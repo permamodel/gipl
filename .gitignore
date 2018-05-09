@@ -5,6 +5,7 @@ orig/
 *.mod
 *.o
 gipl
+dump/
 
 ### Added from: 
 ###   https://github.com/github/gitignore/blob/master/Python.gitignore
