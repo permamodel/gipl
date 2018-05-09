@@ -1,4 +1,5 @@
-CC=ifort
+#CC=ifort
+CC=gfortran
 
 CFLAGS=-c -Ofast #-Wall
 

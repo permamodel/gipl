@@ -2,6 +2,9 @@
 # Local ignores
 orig/
 *.out
+*.mod
+*.o
+gipl
 
 ### Added from: 
 ###   https://github.com/github/gitignore/blob/master/Python.gitignore
