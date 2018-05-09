@@ -34,8 +34,8 @@ implicit none
     real :: frz_up_time_tot                          ! freezeup time global
 ! counters (time,steps)
     real*8 :: time_s,time_e                          ! internal start and end times
-    real*8 :: time_loop                      		 ! main looping time
-    real*8 :: time_cur                     			 ! current time (e.g. current day)
+    real*8 :: time_loop                               ! main looping time
+    real*8 :: time_cur                                  ! current time (e.g. current day)
     integer :: i_site,j_time,i_grd,i_lay
 
 time_s=time_step*DBLE(n_time*time_beg)
@@ -44,8 +44,8 @@ i_time=1
 time_loop=0.0D0
 TINIR=0.0D0
 do while (time_loop.LT.time_e)
-	do i_site=1,n_site
-    	time_cur=time_loop+time_restart
+    do i_site=1,n_site
+        time_cur=time_loop+time_restart
         call save_results(i_site,time_cur,time_loop)
         6666  continue
         
@@ -64,7 +64,7 @@ do while (time_loop.LT.time_e)
         endif
         !enddo
         if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
-            do j_time=1,n_time			! WRITTING RESULTS
+            do j_time=1,n_time            ! WRITTING RESULTS
                 write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
             enddo
         endif
@@ -75,35 +75,35 @@ do while (time_loop.LT.time_e)
 
     i_time=1
     do i_site=1,n_site
-     	frz_up_time_cur=-7777.D0
+         frz_up_time_cur=-7777.D0
         frz_up_time_tot=frz_up_time_cur
         do j_time=2,n_time
-        	if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
-            	if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+            if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
+                if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
             endif
-      	enddo
+          enddo
 
-      	if(frz_up_time_cur.GT.0.0)then
-          	frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
-          	if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
-      	endif
-      	dfrz_frn=z_frz_frn(:,1,i_site)
+          if(frz_up_time_cur.GT.0.0)then
+              frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
+              if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
+          endif
+          dfrz_frn=z_frz_frn(:,1,i_site)
 
-      	call save_results(i_site,time_cur,time_loop)
-      	call active_layer(i_site)
+          call save_results(i_site,time_cur,time_loop)
+          call active_layer(i_site)
 
-    	!____WRITTING MEAN
-      	write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
+        !____WRITTING MEAN
+          write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
                        dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
-      	do j_time=1,n_time+2
-           	utemp_time_i(j_time)=time_cur+DBLE(j_time-1)*time_step
-      	enddo
-      	call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
-      	call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
-      	call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
-      	call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
+          do j_time=1,n_time+2
+               utemp_time_i(j_time)=time_cur+DBLE(j_time-1)*time_step
+          enddo
+          call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
+          call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
+          call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
+          call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
     enddo
-	call save_restart
+    call save_restart
 
     TINIR=time_loop
 enddo
@@ -190,25 +190,25 @@ implicit none
         read(60,'(A)')restart_file
 
 ! read input parameters
-		read(60,'(A)')stdummy
-		read(60,'(A)')stdummy
-		read(60,*)restart
-		read(60,'(A)')stdummy
-		read(60,*)time_step,TAUM,TMIN
-		read(60,'(A)')stdummy
-		read(60,*) time_beg,time_end
-		read(60,'(A)')stdummy
-		read(60,*) smooth_coef,unf_water_coef,itmax  
-		!smoothing factor | unfrozen water parameter | max number of iterations
-		read(60,'(A)')stdummy
-		read(60,*) n_sec_day,n_time 
-		! number of second in a day [sec] | number of time steps (in the example number of days in a year )
-		read(60,'(A)')stdummy
-		read(60,*) sea_level,n_frz_max
-		read(60,'(A)')stdummy
-		read(60,*) frz_frn_min,frz_frn_max
-		read(60,'(A)')stdummy
-		read(60,*) sat_coef
+        read(60,'(A)')stdummy
+        read(60,'(A)')stdummy
+        read(60,*)restart
+        read(60,'(A)')stdummy
+        read(60,*)time_step,TAUM,TMIN
+        read(60,'(A)')stdummy
+        read(60,*) time_beg,time_end
+        read(60,'(A)')stdummy
+        read(60,*) smooth_coef,unf_water_coef,itmax  
+        !smoothing factor | unfrozen water parameter | max number of iterations
+        read(60,'(A)')stdummy
+        read(60,*) n_sec_day,n_time 
+        ! number of second in a day [sec] | number of time steps (in the example number of days in a year )
+        read(60,'(A)')stdummy
+        read(60,*) sea_level,n_frz_max
+        read(60,'(A)')stdummy
+        read(60,*) frz_frn_min,frz_frn_max
+        read(60,'(A)')stdummy
+        read(60,*) sat_coef
 
     close(60)
 
@@ -358,47 +358,47 @@ implicit none
       allocate(n_bnd_lay(n_site,n_lay+1),STAT=IERR)
 
       do i = 1,n_site
-	layer_thick=0
-	n_bnd_lay(i,1)=layer_thick
-	  	layer_thick=0
-	n_bnd_lay(i,1)=layer_thick
- 	do j=1,num_vl(veg_code(i))
-	   vwc(J,I)=A1(j,veg_code(i));
-	   a_coef(J,I)=A2(j,veg_code(i));
-	   b_coef(J,I)=A3(j,veg_code(i));
-	   hcap_thw(J,I)=A4(j,veg_code(i));
-	   hcap_frz(J,I)=A5(j,veg_code(i));
-	   tcon_thw(J,I)=A6(j,veg_code(i));
-	   tcon_frz(J,I)=A7(j,veg_code(i));
-	   if (j.eq.1) then 
-	      layer_thick=A8(veg_code(i),j)
-	   else
-	      layer_thick=layer_thick+A8(veg_code(i),j);
-	   endif
-	   n_bnd_lay(i,j+1)=layer_thick
-	   EE(J,I)=0
-!	     write(*,'(3(f8.3),2(f12.1),3(f8.3))') vwc(J,I),a_coef(J,I),b_coef(J,I), &
-!		  hcap_thw(J,I),hcap_frz(J,I),tcon_thw(J,I),tcon_frz(J,I),n_bnd_lay(i,j+1)
+    layer_thick=0
+    n_bnd_lay(i,1)=layer_thick
+          layer_thick=0
+    n_bnd_lay(i,1)=layer_thick
+     do j=1,num_vl(veg_code(i))
+       vwc(J,I)=A1(j,veg_code(i));
+       a_coef(J,I)=A2(j,veg_code(i));
+       b_coef(J,I)=A3(j,veg_code(i));
+       hcap_thw(J,I)=A4(j,veg_code(i));
+       hcap_frz(J,I)=A5(j,veg_code(i));
+       tcon_thw(J,I)=A6(j,veg_code(i));
+       tcon_frz(J,I)=A7(j,veg_code(i));
+       if (j.eq.1) then 
+          layer_thick=A8(veg_code(i),j)
+       else
+          layer_thick=layer_thick+A8(veg_code(i),j);
+       endif
+       n_bnd_lay(i,j+1)=layer_thick
+       EE(J,I)=0
+!         write(*,'(3(f8.3),2(f12.1),3(f8.3))') vwc(J,I),a_coef(J,I),b_coef(J,I), &
+!          hcap_thw(J,I),hcap_frz(J,I),tcon_thw(J,I),tcon_frz(J,I),n_bnd_lay(i,j+1)
         enddo
-	k=1
-	n_lay_cur(I)=num_vl(veg_code(i))+num_gl(geo_code(i)) ! maximum number of soil layer = organic layers + mineral layers
- 	do j=num_vl(veg_code(i))+1,n_lay_cur(I)
-	   vwc(J,I)=B1(k,geo_code(i));
-	   a_coef(J,I)=B2(k,geo_code(i));
-	   b_coef(J,I)=B3(k,geo_code(i));
-	   hcap_thw(J,I)=B4(k,geo_code(i));
-	   hcap_frz(J,I)=B5(k,geo_code(i));
-	   tcon_thw(J,I)=B6(k,geo_code(i));
-	   tcon_frz(J,I)=B7(k,geo_code(i));
-	   EE(J,I)=0
+    k=1
+    n_lay_cur(I)=num_vl(veg_code(i))+num_gl(geo_code(i)) ! maximum number of soil layer = organic layers + mineral layers
+     do j=num_vl(veg_code(i))+1,n_lay_cur(I)
+       vwc(J,I)=B1(k,geo_code(i));
+       a_coef(J,I)=B2(k,geo_code(i));
+       b_coef(J,I)=B3(k,geo_code(i));
+       hcap_thw(J,I)=B4(k,geo_code(i));
+       hcap_frz(J,I)=B5(k,geo_code(i));
+       tcon_thw(J,I)=B6(k,geo_code(i));
+       tcon_frz(J,I)=B7(k,geo_code(i));
+       EE(J,I)=0
            layer_thick=layer_thick+B8(geo_code(i),k);
-	   n_bnd_lay(i,j+1)=layer_thick!B8(geo_code(i),j)
-	   k=k+1
+       n_bnd_lay(i,j+1)=layer_thick!B8(geo_code(i),j)
+       k=k+1
         enddo
-	   n_bnd_lay(i,n_lay_cur(I)+1)=zdepth(n_grd)
+       n_bnd_lay(i,n_lay_cur(I)+1)=zdepth(n_grd)
       enddo
 
-	allocate(z(n_grd),STAT=IERR)
+    allocate(z(n_grd),STAT=IERR)
     allocate(dz(n_grd),STAT=IERR)
     allocate(temp(n_site,n_grd),STAT=IERR)
     allocate(lay_id(n_site,n_grd),STAT=IERR)
@@ -406,15 +406,15 @@ implicit none
     allocate(z_frz_frn(n_time,n_frz_max,n_site),STAT=IERR)
     allocate(n_frz_frn(n_time,n_site),STAT=IERR)
     allocate(temp_frz(n_lay,n_site),STAT=IERR)
- 	allocate(RES(n_time,m_grd+3),STAT=IERR)
- 	i_time=1  ! active_layer uses it below, needs to be initialized here
- 	
- 	z=zdepth/zdepth(n_grd)
+     allocate(RES(n_time,m_grd+3),STAT=IERR)
+     i_time=1  ! active_layer uses it below, needs to be initialized here
+     
+     z=zdepth/zdepth(n_grd)
     do i_grd=2,n_grd
         dz(i_grd)=z(i_grd)-z(i_grd-1)
     enddo
     
-	hcscale=zdepth(n_grd)*zdepth(n_grd)/n_sec_day
+    hcscale=zdepth(n_grd)*zdepth(n_grd)/n_sec_day
     hcap_frz=hcap_frz*hcscale
     hcap_thw=hcap_thw*hcscale
     hcap_s=hcap_snow*hcscale
@@ -465,7 +465,7 @@ implicit none
         do I=1,last
             call interpolate(zdepth_ini,ztemp_ini(:,I),n_ini,zdepth,temp(I,:),n_grd)
         enddo
-    elseif(restart.EQ.0)then  			!restart=0 enbales spinup
+    elseif(restart.EQ.0)then              !restart=0 enbales spinup
         write(file_init,'(A14)') 'dump/start.txt'
         open(60,file=file_init,action='READ')
             read(60,*)time_restart              ! day number in restart file
@@ -553,7 +553,7 @@ e=EE(NNN,I)
 theta=vwc(NNN,I)
 a=a_coef(NNN,I)
 b=b_coef(NNN,I)
-	
+    
 IF(T.LE.temp_dep-e)THEN
     funf_water=a*((DABS(T))**b)
 ELSEIF(T.GT.temp_dep)THEN
@@ -642,7 +642,7 @@ integer :: n
    if(air_temp(1).gt.0.and.stcon(1).gt.0)stcon(1)=0 
    do i=2,n 
       if(air_temp(i).gt.0.and.stcon(i).gt.0)then 
-	if (stcon(i-1).eq.0)stcon(i)=0 ! puts zeros only at the begining of the year
+    if (stcon(i-1).eq.0)stcon(i)=0 ! puts zeros only at the begining of the year
       endif
    enddo
 
@@ -805,7 +805,7 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
 
     use thermo
     use bnd
-	use const
+    use const
     
     implicit none
 
@@ -922,8 +922,8 @@ subroutine filexist(filename)
     logical chf
     inquire(file=filename,exist=chf)
     if (.not.chf) then 
-	    write(*,'(/'' FILE '',a, '' DOESNT EXIST'')')trim(filename)
-	    stop
+        write(*,'(/'' FILE '',a, '' DOESNT EXIST'')')trim(filename)
+        stop
     endif
 end subroutine filexist!-----------------------------------------------
 
