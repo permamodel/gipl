@@ -1,7 +1,7 @@
-! Geophysical Instatitue Permafrost Laboratory model version 2 GIPLv2
-! version 2 is a numerical transient model that employs phase changes and the effect of the unfrozen volumetric  water content in the non-homogeniuos soil texture
+! Geophysical Institute Permafrost Laboratory model version 2 GIPLv2
+! version 2 is a numerical transient model that employs phase changes and the effect of the unfrozen volumetric water content in the non-homogeneuos soil texture
 ! Original version of the model developed by Romanovsky and Tipenko 2004 and described in Marchenko et al., (2008)
-! Current version been significanlty modefied from its predicessor and using the IRF coding design
+! Current version been significantly modified from its predecessor and uses IRF coding design
 ! This version is maintained by E. Jafarov at INSTAAR, CU Boulder
 ! Please cite Jafarov et al., (2012) work when using it.
 
