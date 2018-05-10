@@ -11,14 +11,16 @@ program gipl2
   use grd
   use alt
 
-  call initialize
-  call run_model
-  call finalize
+  integer n_site, n_time
+
+  call initialize(n_site, n_time)
+  call run_model(n_site, n_time)
+  call finalize(n_site, n_time)
 
 end ! end of main program
 
 
-subroutine run_model
+subroutine run_model(n_site, n_time)
   use gipl_const
   use bnd
   use thermo
@@ -26,6 +28,7 @@ subroutine run_model
   use alt
 
   implicit none
+  integer n_site, n_time
 
 ! variables
   real*8 :: res_save(m_grd+3,n_site)               ! save results into 2D array
@@ -103,7 +106,7 @@ subroutine run_model
       call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
       call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
     enddo
-    call save_restart
+    call save_restart(n_site)
 
     TINIR=time_loop
   enddo
@@ -111,11 +114,13 @@ subroutine run_model
 end subroutine run_model
 
 
-subroutine save_restart
+subroutine save_restart(n_site)
   use bnd
   use thermo
   use grd
   implicit none
+  integer n_site
+
   integer :: i_site,i_grd
 
   rewind(3)
@@ -127,14 +132,15 @@ subroutine save_restart
 end subroutine save_restart
 
 
-subroutine finalize
+subroutine finalize(n_site, n_time)
+  integer n_site, n_time
 
   close(1);close(2);close(3)
 
 end subroutine finalize
 
 
-subroutine initialize
+subroutine initialize(n_site, n_time)
   use gipl_const
   use bnd
   use thermo
@@ -142,6 +148,7 @@ subroutine initialize
   use alt
 
   implicit none
+  integer n_site, n_time
 
   integer IREAD,ierr
   integer :: i,j,k,z_num,i_grd,j_time,i_site,i_lay

@@ -32,7 +32,7 @@ module bnd
   real*8 :: TMIN                                         ! tmin minimal timestep used in the Stefan subroutine
   real*8 :: time_beg,time_end                            ! inbegin time, end time
   integer :: itmax                                       ! maximum number of iterations in Stefan subroutine
-  integer :: n_time                                      ! number of time steps that temp will be averaged over
+  !integer :: n_time                                      ! number of time steps that temp will be averaged over
   integer :: n_frz_max                                   ! maximum number of freezing fronts
   real*8 :: smooth_coef                                  ! smoothing factor
   real*8 :: unf_water_coef                               ! unfrozen water coefficient
@@ -80,7 +80,7 @@ module grd
 
   integer,allocatable,dimension(:):: n_lay_cur                      ! current number of soil layers <= n_lay
 ! calclulated as a sum of organic and mineral soil layers
-  integer :: n_site                                       ! number of sites
+  !integer :: n_site                                       ! number of sites
   integer :: n_grd                                        ! total number of grid points with depth (grid.txt)
   real*8,allocatable,dimension(:):: zdepth,dz                    ! vertical grid and distance between grid point 'zdepth(n_grd)'
   integer,allocatable,dimension(:,:):: lay_id                      ! layer index
