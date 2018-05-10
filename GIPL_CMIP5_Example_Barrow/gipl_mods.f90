@@ -73,23 +73,24 @@ end module thermo
 
 module grd
 
-  integer,allocatable:: n_lay_cur(:)                      ! current number of soil layers <= n_lay
+  integer,allocatable,dimension(:):: n_lay_cur                      ! current number of soil layers <= n_lay
 ! calclulated as a sum of organic and mineral soil layers
   integer :: n_site                                       ! number of sites
   integer :: n_grd                                        ! total number of grid points with depth (grid.txt)
-  real*8,allocatable:: zdepth(:),dz(:)                    ! vertical grid and distance between grid point 'zdepth(n_grd)'
-  integer,allocatable:: lay_id(:,:)                       ! layer index
+  real*8,allocatable,dimension(:):: zdepth,dz                    ! vertical grid and distance between grid point 'zdepth(n_grd)'
+  integer,allocatable,dimension(:,:):: lay_id                      ! layer index
   integer :: m_grd                                        ! number of grid points to store in res file
-  integer,allocatable:: zdepth_id(:)                      ! index vector of stored grid points 'zdepth_id(m_grid)'
+  integer,allocatable,dimension(:):: zdepth_id                      ! index vector of stored grid points 'zdepth_id(m_grid)'
   integer :: n_ini                                        ! number of vertical grid cells in init file
-  real*8, allocatable :: zdepth_ini(:),ztemp_ini(:,:)     ! depth and correspoding initial temperature (time=0) 'zdepth_ini(n_ini)'
+  real*8, allocatable,dimension(:) :: zdepth_ini     ! depth and correspoding initial temperature (time=0) 'zdepth_ini(n_ini)'
+  real*8, allocatable,dimension(:,:) :: ztemp_ini     ! depth and correspoding initial temperature (time=0) 'zdepth_ini(n_ini)'
   character(210) :: FMT1,FMT2                             ! results formating type
 
 end module grd
 
 module alt
-  integer,allocatable::n_frz_frn(:,:)                     ! number of freezing front (e.g. when freezup is about to happened)
-  integer,allocatable::i_time(:)                          ! internal time step with the the main loop
-  real*8 ,allocatable::z_frz_frn(:,:,:)                   ! depth of the freezing front
+  integer,allocatable,dimension(:,:)::n_frz_frn                     ! number of freezing front (e.g. when freezup is about to happened)
+  integer,allocatable,dimension(:)::i_time                          ! internal time step with the the main loop
+  real*8 ,allocatable,dimension(:,:,:)::z_frz_frn                   ! depth of the freezing front
 end module alt
 
