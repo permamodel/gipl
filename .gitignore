@@ -7,6 +7,7 @@ orig/
 gipl
 dump/
 *.pdf
+.DS_Store
 
 ### Added from: 
 ###   https://github.com/github/gitignore/blob/master/Python.gitignore
