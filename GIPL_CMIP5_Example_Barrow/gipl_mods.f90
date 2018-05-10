@@ -9,13 +9,18 @@ end module const
 
 module bnd
   integer :: n_temp                                       ! number of upper boundary points for temperature (input)
-  real*8,allocatable::  utemp_time(:), utemp(:,:)         ! upper boundary time and temperature (input)
-  real*8,allocatable::  utemp_time_i(:), utemp_i(:,:)     ! time and upper boundary temprature (interpolated)
+  real*8,allocatable,dimension(:)::  utemp_time         ! upper boundary time and temperature (input)
+  real*8,allocatable,dimension(:,:)::  utemp         ! upper boundary time and temperature (input)
+  real*8,allocatable,dimension(:)::  utemp_time_i(:)     ! time and upper boundary temprature (interpolated)
+  real*8,allocatable,dimension(:,:)::  utemp_i(:,:)     ! time and upper boundary temprature (interpolated)
   integer :: n_snow                                       ! number of upper boundary points for snow (input)
-  real*8 ,allocatable:: snd_time(:),snd(:,:)              ! upper boundary snow time and snow depth (input)
+  real*8 ,allocatable,dimension(:):: snd_time(:)              ! upper boundary snow time and snow depth (input)
+  real*8 ,allocatable,dimension(:,:):: snd(:,:)              ! upper boundary snow time and snow depth (input)
   integer :: n_stcon
-  real*8 ,allocatable:: stcon_time(:),stcon(:,:)          ! snow thermal conductivity time and itself (input)
-  real*8 ,allocatable:: snd_i (:,:), stcon_i (:,:)        ! snow depth and thermal conductivity (interpolated)
+  real*8 ,allocatable,dimension(:):: stcon_time(:)          ! snow thermal conductivity time and itself (input)
+  real*8 ,allocatable,dimension(:,:):: stcon(:,:)          ! snow thermal conductivity time and itself (input)
+  real*8 ,allocatable,dimension(:,:):: snd_i (:,:)        ! snow depth and thermal conductivity (interpolated)
+  real*8 ,allocatable,dimension(:,:):: stcon_i (:,:)        ! snow depth and thermal conductivity (interpolated)
   real*8 :: TINIR
   real*8 :: time_restart                                  ! restart time in restart file
 
@@ -48,26 +53,26 @@ module thermo
   real*8 sea_level                                        ! how many meter above the sea level the borehole is
 
 ! thermo physical parameters of soil for each soil layer
-  real*8,allocatable:: vwc(:,:)                           ! volumetric water content
-  real*8,allocatable:: a_coef(:,:),b_coef(:,:)            ! a and b unfrozen water curve coefficients
-  real*8,allocatable:: temp_frz(:,:)                      ! temperature freezing depression
-  real*8,allocatable:: EE(:,:)
-  real*8,allocatable:: hcap_frz(:,:),hcap_thw(:,:)        ! soil layer heat capacity thawed/frozen
-  real*8,allocatable:: tcon_frz(:,:),tcon_thw(:,:)        ! soil layer thermal conductivity thawed/frozen
+  real*8,allocatable,dimension(:,:):: vwc                           ! volumetric water content
+  real*8,allocatable,dimension(:,:):: a_coef,b_coef            ! a and b unfrozen water curve coefficients
+  real*8,allocatable,dimension(:,:):: temp_frz                      ! temperature freezing depression
+  real*8,allocatable,dimension(:,:):: EE
+  real*8,allocatable,dimension(:,:):: hcap_frz,hcap_thw        ! soil layer heat capacity thawed/frozen
+  real*8,allocatable,dimension(:,:):: tcon_frz,tcon_thw        ! soil layer thermal conductivity thawed/frozen
 
 
   real*8 :: hcap_s                                         ! heat capacity of snow (constant) nondimentional
 
-  real*8, allocatable :: temp(:,:)                        ! soil temperature
-  real, allocatable:: n_bnd_lay(:,:)                      ! number of boundaries between layer in soil
+  real*8, allocatable,dimension(:,:) :: temp                        ! soil temperature
+  real, allocatable,dimension(:,:):: n_bnd_lay                      ! number of boundaries between layer in soil
   integer k0
 
 
-  integer, allocatable :: snow_code(:),veg_code(:)        ! (not necccessary) required for runing in parallel
-  integer, allocatable :: geo_code(:),gt_zone_code(:)     ! (not necccessary) required for runing in parallel
-  real*8, allocatable  :: temp_grd(:)                     ! temprature gradient at the lower boundary
+  integer, allocatable ,dimension(:):: snow_code,veg_code        ! (not necccessary) required for runing in parallel
+  integer, allocatable ,dimension(:):: geo_code,gt_zone_code     ! (not necccessary) required for runing in parallel
+  real*8, allocatable  ,dimension(:):: temp_grd                     ! temprature gradient at the lower boundary
 
-  real*8 ,allocatable:: RES(:,:)                          ! unified variable for the writing results into the file
+  real*8 ,allocatable,dimension(:,:):: RES                          ! unified variable for the writing results into the file
 
 end module thermo
 
