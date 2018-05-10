@@ -568,7 +568,6 @@ end function funf_water
 real*8 function fsat_unf_water(T,NNN,I)!Saturated unforzen water
   use thermo
 
-!IMPLICIT REAL*8(A-H,O-Z)
   implicit none
   real*8, intent(in) :: T
   integer, intent(in) :: NNN, I
@@ -713,12 +712,25 @@ real*8 function fsnow_level(site_id,time)
 end function fsnow_level
 !-----------------------------------------------
 real*8 function ftcon(T,id,j,time_cur)
+
   use bnd
   use grd
   use thermo
 
-  implicit real*8(A-H,O-Z)
+  implicit none
+
+  real*8 :: T
+  integer :: id, j
+  real*8 :: time_cur
+
   integer :: II
+
+  real*8 :: gr_sur, dsnow, wc
+  integer ns
+
+  ! Define types for functions
+  real*8 :: fsnow_level
+  real*8 :: funf_water
 
   gr_sur=sea_level
   dsnow=sea_level-fsnow_level(id,time_cur)
@@ -739,8 +751,18 @@ end function ftcon
 real*8 function fhcap(T,NNUS,I)
   use thermo
 
-  IMPLICIT REAL*8(A-H,O-Z)
-  DIMENSION NNUS(2),T(2)
+  implicit none
+
+  real*8, dimension(2) :: T
+  integer, dimension(2) :: NNUS
+  integer :: I
+
+  real*8 :: H
+
+  ! Functions
+  real*8 :: fdunf_water
+  real*8 :: funf_water
+
 
   H=1/(T(1)-T(2))
   if(DABS(T(1)-T(2)).LT.1.D-6) THEN
@@ -762,8 +784,20 @@ real*8 function fapp_hcap(T,I,J)       ! Apparent heat capacity
   use thermo
   use grd
 
-  implicit real*8(A-H,O-Z)
-  DIMENSION T(n_grd),WW(2),NN(2)
+  implicit none
+
+  real*8, dimension(n_grd) :: T
+  real*8, dimension(2) :: WW
+  integer, dimension(2) :: NN
+
+  real*8 :: gr_sur
+  real*8 :: wc
+  integer :: i, j
+  integer :: li
+
+  ! Functions
+  real*8 :: funf_water
+  real*8 :: fhcap
 
   li=lay_id(I,J)                          ! layer index
   gr_sur=sea_level                        ! ground surface
