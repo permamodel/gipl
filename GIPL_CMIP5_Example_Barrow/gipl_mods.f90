@@ -1,11 +1,11 @@
-module const
+module gipl_const
 
   real*8, parameter  :: hcap_snow=840000.0                ! heat capacity of snow (constant)
   real*8, parameter  :: Lf=333.2*1.D+6                    ! Latent of water fusion
   integer, parameter :: lbound=2                          ! 1 const temp, 2 heat flux condition at the bottom boundary
   integer, parameter :: n_lay=10                          ! total allowed number of soil layer
 
-end module const
+end module gipl_const
 
 module bnd
   integer :: n_temp                                       ! number of upper boundary points for temperature (input)

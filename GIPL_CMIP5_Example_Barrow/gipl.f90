@@ -19,7 +19,7 @@ end ! end of main program
 
 
 subroutine run_model
-  use const
+  use gipl_const
   use bnd
   use thermo
   use grd
@@ -135,7 +135,7 @@ end subroutine finalize
 
 
 subroutine initialize
-  use const
+  use gipl_const
   use bnd
   use thermo
   use grd
@@ -780,13 +780,14 @@ real*8 function fhcap(T,NNUS,I)
 end function fhcap
 !----------------------------------------
 !----------------------------------------
-real*8 function fapp_hcap(T,I,J)       ! Apparent heat capacity
+real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
   use thermo
   use grd
 
   implicit none
 
-  real*8, dimension(n_grd) :: T
+  integer :: n_grd_passed
+  real*8, dimension(n_grd_passed) :: T
   real*8, dimension(2) :: WW
   integer, dimension(2) :: NN
 
@@ -839,7 +840,7 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
 
   use thermo
   use bnd
-  use const
+  use gipl_const
 
   implicit none
 
@@ -884,7 +885,7 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
   endif
 
   do i_grd=2,n_grd-1
-    D=fapp_hcap(temp_o,isite,i_grd)/timei
+    D=fapp_hcap(temp_o,isite,i_grd,n_grd)/timei
     A=2.D0*ftcon(temp_o(i_grd),isite,i_grd,time_p)/(dz(i_grd)*(dz(i_grd)+dz(i_grd+1)))
     B=2.D0*ftcon(temp_o(i_grd+1),isite,i_grd+1,time_p)/(dz(i_grd+1)*(dz(i_grd)+dz(i_grd+1)))
     C=A+B+D
@@ -893,7 +894,7 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
   enddo
 
   RAB1=ftcon(temp_o(n_grd),isite,n_grd,time_p)
-  RAB2=fapp_hcap(temp_o,isite,n_grd)
+  RAB2=fapp_hcap(temp_o,isite,n_grd,n_grd)
   AKAPA2=2.D0*RAB1/(((RAB2*dz(n_grd)*dz(n_grd))/timei+2.D0*RAB1))
   Q2=RAB1*flux
   AMU2=(temps(n_grd)*RAB2/timei+2.D0*Q2/dz(n_grd))/(RAB2/timei+2.D0*RAB1 &
