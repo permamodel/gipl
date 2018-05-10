@@ -6,6 +6,11 @@
 ! Please cite Jafarov et al., (2012) work when using it.
 
 program gipl2
+  call run_gipl2
+end ! end of main program
+
+
+subroutine run_gipl2
   use bnd
   use thermo
   use grd
@@ -17,7 +22,7 @@ program gipl2
   call run_model(n_site, n_time)
   call finalize(n_site, n_time)
 
-end ! end of main program
+end subroutine run_gipl2
 
 
 subroutine run_model(n_site, n_time)

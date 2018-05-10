@@ -1,7 +1,8 @@
 #CC=ifort
 CC=gfortran
 
-CFLAGS=-c -Ofast #-Wall
+#CFLAGS=-c -Ofast #-Wall
+CFLAGS=-c  #-Wall
 
 all: gipl
 

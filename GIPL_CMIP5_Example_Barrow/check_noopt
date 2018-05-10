@@ -1,0 +1,6 @@
+echo "diff dump/mean.txt no_optimized_output/mean.txt"
+diff dump/mean.txt no_optimized_output/mean.txt
+echo "diff dump/result.txt no_optimized_output/result.txt"
+diff dump/result.txt no_optimized_output/result.txt
+echo "diff dump/start.txt no_optimized_output/start.txt"
+diff dump/start.txt no_optimized_output/start.txt
