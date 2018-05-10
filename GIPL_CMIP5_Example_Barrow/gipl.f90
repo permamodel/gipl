@@ -148,11 +148,11 @@ subroutine initialize
 
 
   real*8 ,allocatable ::gtzone(:,:)
-  character*64 stdummy
-  character*64 fconfig
+  character(64) :: stdummy
+  character(64) :: fconfig
 
-  character*64 file_sites,file_bound,file_snow,file_rsnow,file_init
-  character*64 file_grid,file_organic,file_mineral
+  character(64) :: file_sites,file_bound,file_snow,file_rsnow,file_init
+  character(64) :: file_grid,file_organic,file_mineral
 
   real*8,allocatable:: A1(:,:),A2(:,:),A3(:,:),A4(:,:),A5(:,:)
   real*8,allocatable:: A6(:,:),A7(:,:),A8(:,:),A9(:,:),A10(:,:)
@@ -459,7 +459,7 @@ subroutine init_cond(q,last)
   implicit none
   integer q,last
   integer i,j
-  character*64 file_init
+  character(64) :: file_init
 
   if(q.EQ.1)then !restart=1 means reading initial data from
     do I=1,last
@@ -953,7 +953,7 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
 end subroutine stefan1D
 
 subroutine filexist(filename)
-  character*64 filename
+  character(64) :: filename
   logical chf
   inquire(file=filename,exist=chf)
   if (.not.chf) then
