@@ -8,6 +8,7 @@ gipl
 dump/
 *.pdf
 .DS_Store
+GIPL_CMIP5_Example_Barrow_f2py/
 
 ### Added from: 
 ###   https://github.com/github/gitignore/blob/master/Python.gitignore
