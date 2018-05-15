@@ -27,10 +27,12 @@ module bnd
 
 ! Parameter read from cmd file
   integer :: restart                                     ! 0/1 start from previous time step / start from the begining
-  real*8 :: time_step                                    ! step is the timestep in the example it is 1 yr
+  ! time_step is now in the gipl_bmi module
+  !real*8 :: time_step                                    ! step is the timestep in the example it is 1 yr
   real*8 :: TAUM                                         ! taum is the convergence parameter used by the stefan subroutine
   real*8 :: TMIN                                         ! tmin minimal timestep used in the Stefan subroutine
-  real*8 :: time_beg,time_end                            ! inbegin time, end time
+  ! time_beg and time_end are not in gipl_bmi module
+  !real*8 :: time_beg,time_end                            ! inbegin time, end time
   integer :: itmax                                       ! maximum number of iterations in Stefan subroutine
   !integer :: n_time                                      ! number of time steps that temp will be averaged over
   integer :: n_frz_max                                   ! maximum number of freezing fronts

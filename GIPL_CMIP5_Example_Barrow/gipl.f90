@@ -1,13 +1,17 @@
 ! Geophysical Institute Permafrost Laboratory model version 2 GIPLv2
-! version 2 is a numerical transient model that employs phase changes and the effect of the unfrozen volumetric water content in the non-homogeneuos soil texture
-! Original version of the model developed by Romanovsky and Tipenko 2004 and described in Marchenko et al., (2008)
-! Current version been significantly modified from its predecessor and uses IRF coding design
+! version 2 is a numerical transient model that employs phase changes
+! and the effect of the unfrozen volumetric water content in the
+! non-homogeneuos soil texture
+! Original version of the model developed by Romanovsky and Tipenko 2004
+! and described in Marchenko et al., (2008)
+! Current version been significantly modified from its predecessor
+! and uses IRF coding design
 ! This version is maintained by E. Jafarov at INSTAAR, CU Boulder
 ! Please cite Jafarov et al., (2012) work when using it.
 
 program gipl2
   call run_gipl2
-end ! end of main program
+end
 
 
 subroutine run_gipl2
@@ -37,26 +41,12 @@ subroutine run_model()
 
   implicit none
 
-! variables
-  real*8 :: res_save(m_grd+3,n_site)               ! save results into 2D array
-  real*8 :: dfrz_frn(n_time)                       ! depth of the freezing front
-  real :: frz_up_time_cur                          ! freezeup time current (within a year)
-  real :: frz_up_time_tot                          ! freezeup time global
-! counters (time,steps)
-  real*8 :: time_s,time_e                          ! internal start and end times
-  !real*8 :: time_loop                               ! main looping time
+  real*8 :: res_save(m_grd+3,n_site)     ! save results into 2D array
+  real*8 :: dfrz_frn(n_time)             ! depth of the freezing front
+  real :: frz_up_time_cur                ! freezeup time current (within a year)
+  real :: frz_up_time_tot                ! freezeup time global
   integer :: i_site,j_time,i_grd,i_lay
 
-  ! Initialize the results array
-  do i_site=1,n_site
-    call save_results(i_site, 0.0D0, time_restart)
-  enddo
-
-  time_s=time_step*DBLE(n_time*time_beg)
-  time_e=time_step*DBLE(n_time*time_end)
-  i_time=1  ! this is an implicit array assignment
-  time_loop=0.0D0
-  TINIR=0.0D0
   do while (time_loop.LT.time_e)
     do i_site=1,n_site
       call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
@@ -76,7 +66,7 @@ subroutine run_model()
       ! Perform year-end operations
       do i_site=1,n_site
         if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
-          do j_time=1,n_time            ! WRITING RESULTS
+          do j_time=1,n_time
             write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
           enddo
         endif
@@ -106,16 +96,20 @@ subroutine run_model()
         call active_layer(i_site)
 
         ! WRITE MEAN
-        write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
+        write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
+                i_grd=1,m_grd+3), &
           dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
         do j_time=1,n_time+2
           utemp_time_i(j_time)= &
             time_loop + time_restart + DBLE(j_time - 1) * time_step
         enddo
-        call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
-        call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
+        call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,&
+                utemp_i(:,i_site),n_time+2)
+        call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,&
+                snd_i(:,i_site),n_time+2)
         call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
-        call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
+        call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,&
+                stcon_i(:,i_site),n_time+2)
       enddo
       call save_restart(n_site)
 
@@ -218,7 +212,7 @@ subroutine initialize()
   !smoothing factor | unfrozen water parameter | max number of iterations
   read(60,'(A)')stdummy
   read(60,*) n_sec_day,n_time
-  ! number of second in a day [sec] | number of time steps (in the example number of days in a year )
+  ! number of second in a timestep [sec] | number of time steps in a year
   read(60,'(A)')stdummy
   read(60,*) sea_level,n_frz_max
   read(60,'(A)')stdummy
@@ -308,7 +302,8 @@ subroutine initialize()
   enddo
   close(60)
 
-! note: that all max n_lay_cur layers has to be read or it will a give segmantation error
+! note: that all max n_lay_cur layers has to be read
+! or it will a give segmantation error
 !      n_lay=10!MAXVAL(n_lay_cur)
 !----------------------------------------------------
   open (60, file=file_organic)
@@ -387,7 +382,8 @@ subroutine initialize()
       EE(J,I)=0
     enddo
     k=1
-    n_lay_cur(I)=num_vl(veg_code(i))+num_gl(geo_code(i)) ! maximum number of soil layer = organic layers + mineral layers
+    ! maximum number of soil layer = organic layers + mineral layers
+    n_lay_cur(I)=num_vl(veg_code(i))+num_gl(geo_code(i)) 
     do j=num_vl(veg_code(i))+1,n_lay_cur(I)
       vwc(J,I)=B1(k,geo_code(i));
       a_coef(J,I)=B2(k,geo_code(i));
@@ -428,7 +424,8 @@ subroutine initialize()
   call  assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
   call init_cond(restart,n_site)
 
-  allocate(utemp_time_i(n_time+2),STAT=IERR)                  ! allocating interval varialbe after interation
+  ! allocating interval varialbe after interation
+  allocate(utemp_time_i(n_time+2),STAT=IERR)
   allocate(utemp_i(n_time+2,n_site),STAT=IERR)
   allocate(snd_i(n_time+2,n_site),STAT=IERR)
   allocate(stcon_i(n_time+2,n_site),STAT=IERR)
@@ -439,20 +436,37 @@ subroutine initialize()
   do i_site=1,n_site
     if (lbound.EQ.2)temp_grd(i_site)=temp_grd(i_site)*zdepth(n_grd)
     do i_lay=1,n_lay_cur(i_site)
-      temp_frz(i_lay,i_site)=-(vwc(i_lay,i_site)/a_coef(i_lay,i_site))**(1.d0/b_coef(i_lay,i_site))
+      temp_frz(i_lay,i_site)=-(vwc(i_lay,i_site)/&
+              a_coef(i_lay,i_site))**(1.d0/b_coef(i_lay,i_site))
     enddo
-    call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
-    call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
+    call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,&
+            utemp_i(:,i_site),n_time+2)
+    call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,&
+            snd_i(:,i_site),n_time+2)
     call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
-    call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
+    call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,&
+            stcon_i(:,i_site),n_time+2)
     call active_layer(i_site)
   enddo
 
   open(1,file=result_file,STATUS='unknown')
   open(2,file=aver_res_file,STATUS='unknown')
   open(3,file=restart_file,STATUS='unknown')
-  write(FMT1,'(A30,I0,A12)')'(1x,I10,1x,F12.3,2(1x,F16.12),',m_grd,'(1x,F16.12))'
-  write(FMT2,'(A28,I0,A40)')'(1x,I10,1x,F12.3,2(1x,F8.3),',m_grd,'(1x,F8.3),(1x,F8.3,1x,F12.3),(1x,F12.3))'
+  write(FMT1,'(A30,I0,A12)')'(1x,I10,1x,F12.3,2(1x,F16.12),',&
+          m_grd,'(1x,F16.12))'
+  write(FMT2,'(A28,I0,A40)')'(1x,I10,1x,F12.3,2(1x,F8.3),',&
+          m_grd,'(1x,F8.3),(1x,F8.3,1x,F12.3),(1x,F12.3))'
+
+  ! Initialize the results array
+  do i_site=1,n_site
+    call save_results(i_site, 0.0D0, time_restart)
+  enddo
+
+  time_s=time_step*DBLE(n_time*time_beg)
+  time_e=time_step*DBLE(n_time*time_end)
+  i_time=1  ! this is an implicit array assignment
+  time_loop=0.0D0
+  TINIR=0.0D0
 
 end subroutine initialize
 
@@ -655,7 +669,8 @@ subroutine snowfix(air_temp,stcon,n)
   if(air_temp(1).gt.0.and.stcon(1).gt.0)stcon(1)=0
   do i=2,n
     if(air_temp(i).gt.0.and.stcon(i).gt.0)then
-      if (stcon(i-1).eq.0)stcon(i)=0 ! puts zeros only at the begining of the year
+      ! puts zeros only at the begining of the year
+      if (stcon(i-1).eq.0)stcon(i)=0
     endif
   enddo
 
@@ -690,8 +705,8 @@ end
 
 !----------------------------------------
 subroutine assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
-!assigns correspond layer id to the grid point
-!starting from surface to the bottom
+  !assigns correspond layer id to the grid point
+  !starting from surface to the bottom
   implicit none
 
   integer :: n_site,n_grd,n_lay
@@ -704,7 +719,8 @@ subroutine assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
     do 6 igrd=1,n_grd
       lay_id(isite,igrd)=n_lay_cur(isite)
       do ilay=1,n_lay_cur(isite)-1
-        if ( n_bnd_lay(isite,ilay).LE.zdepth(igrd).AND.zdepth(igrd).LT.n_bnd_lay(isite,ilay+1))then
+        if ( n_bnd_lay(isite,ilay).LE.zdepth(igrd).AND.&
+                zdepth(igrd).LT.n_bnd_lay(isite,ilay+1))then
           lay_id(isite,igrd)=ilay
           GOTO 6
         endif
@@ -722,7 +738,8 @@ real*8 function fsnow_level(site_id,time)
 
   II=1+IDINT((time-TINIR)/time_step)
   fsnow_level=snd_i(II,site_id)+(time+time_restart-utemp_time_i(II))* &
-    (snd_i(II+1,site_id)-snd_i(II,site_id))/(utemp_time_i(II+1)-utemp_time_i(II))
+    (snd_i(II+1,site_id)-snd_i(II,site_id))/(utemp_time_i(II+1)&
+    -utemp_time_i(II))
   return
 end function fsnow_level
 !-----------------------------------------------
@@ -877,8 +894,10 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
   real*8 :: ALF(n_grd),BET(n_grd)
   real*8 :: EEY,EEY1,abs1,abs2
 
-  real*8 :: temp_o(n_grd)             ! old temperature before tridiagonal method
-  real*8 :: temp_n(n_grd)             ! new temperature after tridiagonal method
+  ! old temperature before tridiagonal method
+  real*8 :: temp_o(n_grd)
+  ! new temperature after tridiagonal method
+  real*8 :: temp_n(n_grd)
 
 ! time counter internal to this subroutine
   real*8 :: time_l                    ! loop time in a subroutine
@@ -905,8 +924,10 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 
   do i_grd=2,n_grd-1
     D=fapp_hcap(temp_o,isite,i_grd,n_grd)/timei
-    A=2.D0*ftcon(temp_o(i_grd),isite,i_grd,time_p)/(dz(i_grd)*(dz(i_grd)+dz(i_grd+1)))
-    B=2.D0*ftcon(temp_o(i_grd+1),isite,i_grd+1,time_p)/(dz(i_grd+1)*(dz(i_grd)+dz(i_grd+1)))
+    A=2.D0*ftcon(temp_o(i_grd),isite,i_grd,time_p)/&
+            (dz(i_grd)*(dz(i_grd)+dz(i_grd+1)))
+    B=2.D0*ftcon(temp_o(i_grd+1),isite,i_grd+1,time_p)/&
+            (dz(i_grd+1)*(dz(i_grd)+dz(i_grd+1)))
     C=A+B+D
     ALF(i_grd+1)=B/(C-A*ALF(i_grd))
     BET(i_grd+1)=(A*BET(i_grd)+D*temps(i_grd))/(C-A*ALF(i_grd))
@@ -933,7 +954,8 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 
 ! calculates new tempratures
   do i_grd=1,n_grd-1
-    temp_n(n_grd-i_grd)=ALF(n_grd-i_grd+1)*temp_n(n_grd-i_grd+1)+BET(n_grd-i_grd+1)
+    temp_n(n_grd-i_grd)=ALF(n_grd-i_grd+1)*temp_n(n_grd-i_grd+1)+&
+            BET(n_grd-i_grd+1)
   enddo
 
   if(timei>tmin) then
