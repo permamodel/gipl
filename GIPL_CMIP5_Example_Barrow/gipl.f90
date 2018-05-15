@@ -43,7 +43,6 @@ subroutine run_model(n_site, n_time)
 ! counters (time,steps)
   real*8 :: time_s,time_e                          ! internal start and end times
   real*8 :: time_loop                               ! main looping time
-  real*8 :: time_cur                                  ! current time (e.g. current day)
   integer :: i_site,j_time,i_grd,i_lay
 
   time_s=time_step*DBLE(n_time*time_beg)
@@ -53,8 +52,9 @@ subroutine run_model(n_site, n_time)
   TINIR=0.0D0
   do while (time_loop.LT.time_e)
     do i_site=1,n_site
-      time_cur=time_loop+time_restart
-      call save_results(i_site,time_cur,time_loop)
+      ! Set i_time as the "fraction of the year"
+      !i_time(i_site) = mod(int(time_loop), n_time) + 1
+      call save_results(i_site,time_loop, time_restart)
 6666  continue
 
       !do while (i_time(i_site).LT.n_time)
@@ -62,10 +62,9 @@ subroutine run_model(n_site, n_time)
       call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
         temp_grd(i_site))
       time_loop=time_loop+time_step
-      time_cur=time_loop+time_restart
       if(i_time(i_site).LT.n_time)  then
         i_time(i_site)=i_time(i_site)+1
-        call save_results(i_site,time_cur,time_loop)
+        call save_results(i_site,time_loop, time_restart)
         call active_layer(i_site)
         !    write(*,*) 'goto', i_time,time_loop
         GOTO 6666
@@ -98,14 +97,15 @@ subroutine run_model(n_site, n_time)
         endif
         dfrz_frn=z_frz_frn(:,1,i_site)
 
-        call save_results(i_site,time_cur,time_loop)
+        call save_results(i_site,time_loop, time_restart)
         call active_layer(i_site)
 
         ! WRITING MEAN
         write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
           dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
         do j_time=1,n_time+2
-          utemp_time_i(j_time)=time_cur+DBLE(j_time-1)*time_step
+          utemp_time_i(j_time)= &
+            time_loop + time_restart + DBLE(j_time - 1) * time_step
         enddo
         call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
         call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
@@ -531,17 +531,19 @@ subroutine active_layer(k)
 
 end subroutine active_layer
 
-subroutine save_results(k,time1,time2)
+subroutine save_results(k, time2, restart_time)
   use thermo
   use grd
   use alt
 
   implicit none
   integer :: k,j
-  real*8 :: time1,time2
+  real*8 :: restart_time
+  real*8 :: time2
   real*8 :: futemp,fsnow_level
 
-  RES(i_time(k),1)=time1
+  !print*,'in time loop, time2 - time1:', time2 - time1
+  RES(i_time(k),1)=time2 + restart_time
   RES(i_time(k),2)=futemp(time2,k)
   RES(i_time(k),3)=fsnow_level(k,time2)
   do  J=1,m_grd
