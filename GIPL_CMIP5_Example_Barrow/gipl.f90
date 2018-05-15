@@ -88,11 +88,6 @@ subroutine update_model()
   else
     ! Perform year-end operations
     do i_site=1,n_site
-      if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
-        do j_time=1,n_time
-          write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
-        enddo
-      endif
       do i_grd=1,m_grd+3
         res_save(i_grd,i_site)=sum((RES(:,i_grd)))
       enddo
@@ -119,10 +114,6 @@ subroutine update_model()
       call save_results(i_site,time_loop, time_restart)
       call active_layer(i_site)
 
-      ! WRITE MEAN
-      write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
-              i_grd=1,m_grd+3), &
-        dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
       do j_time=1,n_time+2
         utemp_time_i(j_time)= &
           time_loop + time_restart + DBLE(j_time - 1) * time_step
@@ -135,9 +126,34 @@ subroutine update_model()
       call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,&
               stcon_i(:,i_site),n_time+2)
     enddo
-    call save_restart(n_site)
+  endif
 
+  if (mod(int(time_loop), n_time) .eq. 0) then
     TINIR=time_loop
+  endif
+  ! Write to results file
+  if (mod(int(time_loop), n_time) .eq. n_time-1) then
+    do i_site=1,n_site
+      if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
+        do j_time=1,n_time
+          write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
+        enddo
+      endif
+    enddo
+  endif
+
+  ! Write mean results
+  if (mod(int(time_loop), n_time) .eq. 0) then
+    do i_site=1,n_site
+      write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
+              i_grd=1,m_grd+3), &
+        dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
+    enddo
+  endif
+
+  ! Write to the restart file
+  if (mod(int(time_loop), n_time) .eq. 0) then
+    call save_restart(n_site)
   endif
 
 end subroutine update_model
