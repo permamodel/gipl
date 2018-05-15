@@ -15,11 +15,13 @@ end
 
 
 subroutine run_gipl2
-  use gipl_bmi
-  use bnd
-  use thermo
-  use grd
-  use alt
+  use gipl_bmi, only : time_step, time_e, fconfig
+  !use bnd
+  !use thermo
+  !use grd
+  !use alt
+
+  implicit none
 
   !fconfig='gipl_config.cfg'
   fconfig='gipl_config_3yr.cfg'
@@ -41,6 +43,8 @@ end subroutine run_gipl2
 
 subroutine update_model_until(until_time)
   use gipl_bmi
+
+  implicit none
 
   real*8 :: until_time
 
@@ -158,6 +162,8 @@ end subroutine save_restart
 
 
 subroutine finalize()
+
+  implicit none
 
   close(1);close(2);close(3)
 
@@ -681,9 +687,12 @@ end function futemp
 !----------------------------------------
 subroutine snowfix(air_temp,stcon,n)
 
+  implicit none
+
   real*8, intent (in)  :: air_temp(n)
   real*8, intent (out) :: stcon(n)
   integer :: n
+  integer :: i
 
   if(air_temp(1).gt.0.and.stcon(1).gt.0)stcon(1)=0
   do i=2,n
@@ -699,9 +708,12 @@ end subroutine snowfix
 !----------------------------------------
 subroutine interpolate(XIN,YIN,NIN,XOUT,YOUT,n_itime)
 ! Linear interpolation
+  implicit none
   real*8, intent(in) :: XIN(NIN),YIN(NIN)
   real*8, intent(out) :: XOUT(n_itime),YOUT(n_itime)
   integer :: NIN,n_itime
+  integer :: i, j
+
   do I=1,n_itime
     if(XOUT(I).LE.XIN(1))THEN
       YOUT(I)=YIN(1)
@@ -1013,6 +1025,7 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 end subroutine stefan1D
 
 subroutine filexist(filename)
+  implicit none
   character(64) :: filename
   logical chf
   inquire(file=filename,exist=chf)
