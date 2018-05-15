@@ -15,7 +15,7 @@ end
 
 
 subroutine run_gipl2
-  use gipl_bmi, only : time_step, time_e, fconfig
+  use gipl_bmi
   !use bnd
   !use thermo
   !use grd
@@ -27,14 +27,12 @@ subroutine run_gipl2
   fconfig='gipl_config_3yr.cfg'
   call initialize()
 
-  call update_model()
-  call update_model()
-  call update_model()
-
-  call update_model_until(time_e - 2*time_step)
-
-  call update_model()
-  call update_model()
+  do while (time_loop .lt. time_e)
+    call update_model()
+    call update_model_until(time_loop + (n_time - 1) * time_step)
+    call update_model()
+    call write_output()
+  enddo
 
   call finalize()
 
@@ -65,11 +63,7 @@ subroutine update_model()
 
   implicit none
 
-  real*8 :: res_save(m_grd+3,n_site)     ! save results into 2D array
-  real*8 :: dfrz_frn(n_time)             ! depth of the freezing front
-  real :: frz_up_time_cur                ! freezeup time current (within a year)
-  real :: frz_up_time_tot                ! freezeup time global
-  integer :: i_site,j_time,i_grd
+  integer :: i_site,j_time
 
   do i_site=1,n_site
     call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
@@ -87,30 +81,9 @@ subroutine update_model()
     enddo
   else
     ! Perform year-end operations
-    do i_site=1,n_site
-      do i_grd=1,m_grd+3
-        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
-      enddo
-    enddo
-
     i_time=1  ! this is an implicit array assignment
 
     do i_site=1,n_site
-      frz_up_time_cur=-7777.D0
-      frz_up_time_tot=frz_up_time_cur
-      do j_time=2,n_time
-        if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
-          if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.&
-                  frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
-        endif
-      enddo
-
-      if(frz_up_time_cur.GT.0.0)then
-        frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
-        if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
-      endif
-      dfrz_frn=z_frz_frn(:,1,i_site)
-
       call save_results(i_site,time_loop, time_restart)
       call active_layer(i_site)
 
@@ -131,6 +104,27 @@ subroutine update_model()
   if (mod(int(time_loop), n_time) .eq. 0) then
     TINIR=time_loop
   endif
+
+end subroutine update_model
+
+
+subroutine write_output()
+  use gipl_bmi
+  use grd
+  use thermo
+  use alt
+  use bnd
+
+  implicit none
+
+  integer :: i_site, j_time, i_grd
+
+  real*8 :: res_save(m_grd+3,n_site) ! save results into 2D array
+
+  real*8 :: dfrz_frn(n_time)             ! depth of the freezing front
+  real :: frz_up_time_cur            ! freezeup time current (within a year)
+  real :: frz_up_time_tot            ! freezeup time global
+
   ! Write to results file
   if (mod(int(time_loop), n_time) .eq. n_time-1) then
     do i_site=1,n_site
@@ -143,6 +137,29 @@ subroutine update_model()
   endif
 
   ! Write mean results
+  do i_site=1,n_site
+    do i_grd=1,m_grd+3
+      res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+    enddo
+  enddo
+
+  do i_site=1,n_site
+    frz_up_time_cur=-7777.D0
+    frz_up_time_tot=frz_up_time_cur
+    do j_time=2,n_time
+      if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
+        if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.&
+                frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+      endif
+    enddo
+
+    if(frz_up_time_cur.GT.0.0)then
+      frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
+      if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
+    endif
+    dfrz_frn=z_frz_frn(:,1,i_site)
+  enddo
+
   if (mod(int(time_loop), n_time) .eq. 0) then
     do i_site=1,n_site
       write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
@@ -156,7 +173,7 @@ subroutine update_model()
     call save_restart(n_site)
   endif
 
-end subroutine update_model
+end subroutine write_output
 
 
 subroutine save_restart(n_site)
