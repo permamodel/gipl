@@ -860,10 +860,11 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
 
   implicit none
 
-  integer, intent(inout) :: n_grd
-  real*8, intent(inout) :: dz(n_grd),temps(n_grd)
-  integer, intent(inout) :: lay_idx(n_grd)
-  real*8, intent(inout) :: time_loop
+  integer, intent(in) :: n_grd
+  real*8, intent(in) :: dz(n_grd)
+  real*8, intent(inout) :: temps(n_grd)
+  integer, intent(in) :: lay_idx(n_grd)
+  real*8, intent(in) :: time_loop
   real*8 :: futemp,flux,fapp_hcap,ftcon,fsat_unf_water
 
   integer :: isite,i_grd,IT
