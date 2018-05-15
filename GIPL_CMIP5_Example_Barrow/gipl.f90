@@ -23,13 +23,18 @@ subroutine run_gipl2
   fconfig='gipl_config.cfg'
   call initialize()
 
-  call run_model(n_site, n_time)
-  call finalize(n_site, n_time)
+  !call run_model(n_site, n_time)
+  call run_model()
+
+  !call finalize(n_site, n_time)
+  call finalize()
 
 end subroutine run_gipl2
 
 
-subroutine run_model(n_site, n_time)
+!subroutine run_model(n_site, n_time)
+subroutine run_model()
+  use gipl_bmi
   use gipl_const
   use bnd
   use thermo
@@ -37,7 +42,7 @@ subroutine run_model(n_site, n_time)
   use alt
 
   implicit none
-  integer n_site, n_time
+  !integer n_site, n_time
 
 ! variables
   real*8 :: res_save(m_grd+3,n_site)               ! save results into 2D array
@@ -46,7 +51,7 @@ subroutine run_model(n_site, n_time)
   real :: frz_up_time_tot                          ! freezeup time global
 ! counters (time,steps)
   real*8 :: time_s,time_e                          ! internal start and end times
-  real*8 :: time_loop                               ! main looping time
+  !real*8 :: time_loop                               ! main looping time
   integer :: i_site,j_time,i_grd,i_lay
 
   ! Initialize the results array
@@ -61,7 +66,8 @@ subroutine run_model(n_site, n_time)
   TINIR=0.0D0
   do while (time_loop.LT.time_e)
     do i_site=1,n_site
-      call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
+      !call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
+      call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
         temp_grd(i_site))
     enddo
 
@@ -146,8 +152,9 @@ subroutine save_restart(n_site)
 end subroutine save_restart
 
 
-subroutine finalize(n_site, n_time)
-  integer n_site, n_time
+!subroutine finalize(n_site, n_time)
+subroutine finalize()
+  !integer n_site, n_time
 
   close(1);close(2);close(3)
 
@@ -871,7 +878,8 @@ real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
   return
 end
 !-------------------------------------------------------
-subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
+!subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
+subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 
   use gipl_bmi
   use thermo
@@ -884,7 +892,7 @@ subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
   real*8, intent(in) :: dz(n_grd)
   real*8, intent(inout) :: temps(n_grd)
   integer, intent(in) :: lay_idx(n_grd)
-  real*8, intent(in) :: time_loop
+  !real*8, intent(in) :: time_loop
   real*8 :: futemp,flux,fapp_hcap,ftcon,fsat_unf_water
 
   integer :: isite,i_grd,IT

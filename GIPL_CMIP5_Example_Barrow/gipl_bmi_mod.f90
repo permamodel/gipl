@@ -3,6 +3,7 @@ module gipl_bmi
   integer, save :: n_site
   integer, save :: n_time
   character(64) :: fconfig
+  real*8, save :: time_loop
 
 !  subroutine bmi_initialize(config_filename)
 !    use gipl_const
