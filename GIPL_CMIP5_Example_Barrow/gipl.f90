@@ -24,14 +24,16 @@ subroutine run_gipl2
   fconfig='gipl_config.cfg'
   call initialize()
 
-  call run_model()
+  do while (time_loop.LT.time_e)
+    call update_model()
+  enddo
 
   call finalize()
 
 end subroutine run_gipl2
 
 
-subroutine run_model()
+subroutine update_model()
   use gipl_bmi
   use gipl_const
   use bnd
@@ -47,77 +49,75 @@ subroutine run_model()
   real :: frz_up_time_tot                ! freezeup time global
   integer :: i_site,j_time,i_grd,i_lay
 
-  do while (time_loop.LT.time_e)
-    do i_site=1,n_site
-      call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
-        temp_grd(i_site))
-    enddo
-
-    time_loop=time_loop+time_step
-
-    if (mod(int(time_loop), n_time) .ne. 0) then
-      ! Perform intra-year operations
-      do i_site=1,n_site
-        i_time(i_site)=i_time(i_site)+1
-        call save_results(i_site,time_loop, time_restart)
-        call active_layer(i_site)
-      enddo
-    else
-      ! Perform year-end operations
-      do i_site=1,n_site
-        if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
-          do j_time=1,n_time
-            write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
-          enddo
-        endif
-        do i_grd=1,m_grd+3
-          res_save(i_grd,i_site)=sum((RES(:,i_grd)))
-        enddo
-      enddo
-
-      i_time=1  ! this is an implicit array assignment
-
-      do i_site=1,n_site
-        frz_up_time_cur=-7777.D0
-        frz_up_time_tot=frz_up_time_cur
-        do j_time=2,n_time
-          if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
-            if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
-          endif
-        enddo
-
-        if(frz_up_time_cur.GT.0.0)then
-          frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
-          if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
-        endif
-        dfrz_frn=z_frz_frn(:,1,i_site)
-
-        call save_results(i_site,time_loop, time_restart)
-        call active_layer(i_site)
-
-        ! WRITE MEAN
-        write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
-                i_grd=1,m_grd+3), &
-          dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
-        do j_time=1,n_time+2
-          utemp_time_i(j_time)= &
-            time_loop + time_restart + DBLE(j_time - 1) * time_step
-        enddo
-        call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,&
-                utemp_i(:,i_site),n_time+2)
-        call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,&
-                snd_i(:,i_site),n_time+2)
-        call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
-        call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,&
-                stcon_i(:,i_site),n_time+2)
-      enddo
-      call save_restart(n_site)
-
-      TINIR=time_loop
-    endif
+  do i_site=1,n_site
+    call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
+      temp_grd(i_site))
   enddo
 
-end subroutine run_model
+  time_loop=time_loop+time_step
+
+  if (mod(int(time_loop), n_time) .ne. 0) then
+    ! Perform intra-year operations
+    do i_site=1,n_site
+      i_time(i_site)=i_time(i_site)+1
+      call save_results(i_site,time_loop, time_restart)
+      call active_layer(i_site)
+    enddo
+  else
+    ! Perform year-end operations
+    do i_site=1,n_site
+      if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
+        do j_time=1,n_time
+          write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
+        enddo
+      endif
+      do i_grd=1,m_grd+3
+        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+      enddo
+    enddo
+
+    i_time=1  ! this is an implicit array assignment
+
+    do i_site=1,n_site
+      frz_up_time_cur=-7777.D0
+      frz_up_time_tot=frz_up_time_cur
+      do j_time=2,n_time
+        if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
+          if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+        endif
+      enddo
+
+      if(frz_up_time_cur.GT.0.0)then
+        frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
+        if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
+      endif
+      dfrz_frn=z_frz_frn(:,1,i_site)
+
+      call save_results(i_site,time_loop, time_restart)
+      call active_layer(i_site)
+
+      ! WRITE MEAN
+      write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
+              i_grd=1,m_grd+3), &
+        dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
+      do j_time=1,n_time+2
+        utemp_time_i(j_time)= &
+          time_loop + time_restart + DBLE(j_time - 1) * time_step
+      enddo
+      call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,&
+              utemp_i(:,i_site),n_time+2)
+      call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,&
+              snd_i(:,i_site),n_time+2)
+      call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
+      call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,&
+              stcon_i(:,i_site),n_time+2)
+    enddo
+    call save_restart(n_site)
+
+    TINIR=time_loop
+  endif
+
+end subroutine update_model
 
 
 subroutine save_restart(n_site)
