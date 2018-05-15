@@ -25,13 +25,30 @@ subroutine run_gipl2
   fconfig='gipl_config_3yr.cfg'
   call initialize()
 
-  do while (time_loop.LT.time_e)
-    call update_model()
-  enddo
+  call update_model()
+  call update_model()
+  call update_model()
+
+  call update_model_until(time_e - 2*time_step)
+
+  call update_model()
+  call update_model()
 
   call finalize()
 
 end subroutine run_gipl2
+
+
+subroutine update_model_until(until_time)
+  use gipl_bmi
+
+  real*8 :: until_time
+
+  do while (time_loop.LT.until_time)
+    call update_model()
+  enddo
+
+end subroutine update_model_until
 
 
 subroutine update_model()
