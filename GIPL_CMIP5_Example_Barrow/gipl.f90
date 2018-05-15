@@ -49,9 +49,10 @@ subroutine run_model(n_site, n_time)
   do i_site=1,n_site
     call save_results(i_site, 0.0D0, time_restart)
   enddo
+
   time_s=time_step*DBLE(n_time*time_beg)
   time_e=time_step*DBLE(n_time*time_end)
-  i_time=1
+  i_time=1  ! this is an implicit array assignment
   time_loop=0.0D0
   TINIR=0.0D0
   do while (time_loop.LT.time_e)
@@ -79,7 +80,7 @@ subroutine run_model(n_site, n_time)
     enddo
 
     if (mod(int(time_loop), n_time) .eq. 0) then
-      i_time=1
+      i_time=1  ! this is an implicit array assignment
       do i_site=1,n_site
         frz_up_time_cur=-7777.D0
         frz_up_time_tot=frz_up_time_cur
@@ -419,8 +420,8 @@ subroutine initialize(n_site, n_time)
   allocate(n_frz_frn(n_time,n_site),STAT=IERR)
   allocate(temp_frz(n_lay,n_site),STAT=IERR)
   allocate(RES(n_time,m_grd+3),STAT=IERR)
-  i_time=1  ! active_layer uses it below, needs to be initialized here
-
+  ! active_layer uses i_time below, needs to be initialized here
+  i_time=1   ! this is an implicit array assignment
   z=zdepth/zdepth(n_grd)
   do i_grd=2,n_grd
     dz(i_grd)=z(i_grd)-z(i_grd-1)
