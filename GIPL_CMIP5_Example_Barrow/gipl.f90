@@ -65,7 +65,7 @@ subroutine update_model()
   real*8 :: dfrz_frn(n_time)             ! depth of the freezing front
   real :: frz_up_time_cur                ! freezeup time current (within a year)
   real :: frz_up_time_tot                ! freezeup time global
-  integer :: i_site,j_time,i_grd,i_lay
+  integer :: i_site,j_time,i_grd
 
   do i_site=1,n_site
     call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
@@ -185,7 +185,7 @@ subroutine initialize()
   character(64) :: file_grid,file_organic,file_mineral
 
   real*8,allocatable:: A1(:,:),A2(:,:),A3(:,:),A4(:,:),A5(:,:)
-  real*8,allocatable:: A6(:,:),A7(:,:),A8(:,:),A9(:,:),A10(:,:)
+  real*8,allocatable:: A6(:,:),A7(:,:),A8(:,:)
   integer, allocatable :: veg_class(:), num_vl(:)
   integer :: vln
 
@@ -381,9 +381,9 @@ subroutine initialize()
 
   do i = 1,n_site
     layer_thick=0
-    n_bnd_lay(i,1)=layer_thick
+    n_bnd_lay(i,1)=SNGL(layer_thick)
     layer_thick=0
-    n_bnd_lay(i,1)=layer_thick
+    n_bnd_lay(i,1)=SNGL(layer_thick)
     do j=1,num_vl(veg_code(i))
       vwc(J,I)=A1(j,veg_code(i));
       a_coef(J,I)=A2(j,veg_code(i));
@@ -397,7 +397,7 @@ subroutine initialize()
       else
         layer_thick=layer_thick+A8(veg_code(i),j);
       endif
-      n_bnd_lay(i,j+1)=layer_thick
+      n_bnd_lay(i,j+1)=SNGL(layer_thick)
       EE(J,I)=0
     enddo
     k=1
@@ -413,10 +413,10 @@ subroutine initialize()
       tcon_frz(J,I)=B7(k,geo_code(i));
       EE(J,I)=0
       layer_thick=layer_thick+B8(geo_code(i),k);
-      n_bnd_lay(i,j+1)=layer_thick!B8(geo_code(i),j)
+      n_bnd_lay(i,j+1)=SNGL(layer_thick) !B8(geo_code(i),j)
       k=k+1
     enddo
-    n_bnd_lay(i,n_lay_cur(I)+1)=zdepth(n_grd)
+    n_bnd_lay(i,n_lay_cur(I)+1)=SNGL(zdepth(n_grd))
   enddo
 
   allocate(z(n_grd),STAT=IERR)
