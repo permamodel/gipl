@@ -1,0 +1,5 @@
+# mrc: make, run, compare
+make clean
+make
+./gipl
+. ./check_noopt_3yr

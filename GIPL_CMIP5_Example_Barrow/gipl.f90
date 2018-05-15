@@ -21,7 +21,8 @@ subroutine run_gipl2
   use grd
   use alt
 
-  fconfig='gipl_config.cfg'
+  !fconfig='gipl_config.cfg'
+  fconfig='gipl_config_3yr.cfg'
   call initialize()
 
   do while (time_loop.LT.time_e)
@@ -83,7 +84,8 @@ subroutine update_model()
       frz_up_time_tot=frz_up_time_cur
       do j_time=2,n_time
         if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
-          if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+          if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.&
+                  frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
         endif
       enddo
 
