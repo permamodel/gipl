@@ -17,22 +17,16 @@ subroutine run_gipl2
   use grd
   use alt
 
-  !character(64) :: fconfig
-
-  !call initialize(n_site, n_time)
   fconfig='gipl_config.cfg'
   call initialize()
 
-  !call run_model(n_site, n_time)
   call run_model()
 
-  !call finalize(n_site, n_time)
   call finalize()
 
 end subroutine run_gipl2
 
 
-!subroutine run_model(n_site, n_time)
 subroutine run_model()
   use gipl_bmi
   use gipl_const
@@ -42,7 +36,6 @@ subroutine run_model()
   use alt
 
   implicit none
-  !integer n_site, n_time
 
 ! variables
   real*8 :: res_save(m_grd+3,n_site)               ! save results into 2D array
@@ -66,7 +59,6 @@ subroutine run_model()
   TINIR=0.0D0
   do while (time_loop.LT.time_e)
     do i_site=1,n_site
-      !call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
       call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
         temp_grd(i_site))
     enddo
@@ -152,16 +144,13 @@ subroutine save_restart(n_site)
 end subroutine save_restart
 
 
-!subroutine finalize(n_site, n_time)
 subroutine finalize()
-  !integer n_site, n_time
 
   close(1);close(2);close(3)
 
 end subroutine finalize
 
 
-!subroutine initialize(n_site, n_time)
 subroutine initialize()
   use gipl_bmi
   use gipl_const
@@ -171,7 +160,6 @@ subroutine initialize()
   use alt
 
   implicit none
-  !integer n_site, n_time
 
   integer IREAD,ierr
   integer :: i,j,k,z_num,i_grd,j_time,i_site,i_lay
@@ -179,7 +167,6 @@ subroutine initialize()
 
   real*8 ,allocatable ::gtzone(:,:)
   character(64) :: stdummy
-  !character(64) :: fconfig
 
   character(64) :: file_sites,file_bound,file_snow,file_rsnow,file_init
   character(64) :: file_grid,file_organic,file_mineral
@@ -197,10 +184,9 @@ subroutine initialize()
   real*8, allocatable :: z(:) ! vertical grid
   real*8 :: hcscale
 
-  !fconfig='gipl_config.cfg'
   call filexist(fconfig)
   open(60,file=fconfig)
-!read input files
+  !read input files
   read(60,'(A)')stdummy
   read(60,'(A)')file_sites
   read(60,'(A)')file_bound
@@ -212,14 +198,14 @@ subroutine initialize()
   read(60,'(A)')file_organic
   read(60,'(A)')file_mineral
 
-! read output files
+  ! read output files
   read(60,'(A)')stdummy
   read(60,'(A)')stdummy
   read(60,'(A)')aver_res_file
   read(60,'(A)')result_file
   read(60,'(A)')restart_file
 
-! read input parameters
+  ! read input parameters
   read(60,'(A)')stdummy
   read(60,'(A)')stdummy
   read(60,*)restart
@@ -263,7 +249,6 @@ subroutine initialize()
       gt_zone_code(i_site),temp_grd(i_site)
   enddo
   close(60)
-!   print*, trim(file_sites),' has been read'
 
   open(60,file=file_bound)
   read(60,*)n_temp
@@ -273,7 +258,6 @@ subroutine initialize()
     read(60,*) utemp_time(I),(utemp(I,i_site),i_site=1,n_site)
   enddo
   close(60)
-!   print*,trim(file_bound),' has been read'
 
   open(60,file=file_rsnow)
   read(60,*)n_stcon
@@ -283,7 +267,6 @@ subroutine initialize()
     read(60,*) stcon_time(i),(stcon(i,i_site),i_site=1,n_site)
   enddo
   close(60)
-!   print*,trim(file_rsnow),' has been read'
 
   open(60,file=file_snow)
   read(60,*)n_snow
@@ -293,7 +276,6 @@ subroutine initialize()
     read(60,*) snd_time(i),(snd(i,i_site),i_site=1,n_site)
   enddo
   close(60)
-!   print*,trim(file_snow),' has been read'
 
   open(60,file=file_init,action='read')
   read(60,*)z_num,n_ini!,time_restart
@@ -305,7 +287,6 @@ subroutine initialize()
     read(60,*) (gtzone(i,j),j=1,z_num+1)
   enddo
   close(60)
-!   print*,trim(file_init),'has been read'
 
   time_restart=utemp_time(1)
   zdepth_ini(:)=gtzone(:,1)
@@ -326,7 +307,6 @@ subroutine initialize()
     read(60,*)zdepth_id(j)
   enddo
   close(60)
-!   print*,trim(file_grid),' has been read'
 
 ! note: that all max n_lay_cur layers has to be read or it will a give segmantation error
 !      n_lay=10!MAXVAL(n_lay_cur)
@@ -351,7 +331,6 @@ subroutine initialize()
     enddo
   enddo
   close(60)
-!   print*,trim(file_organic),' has been read'
 
   open (60, file=file_mineral)
   read(60,*) gln ! reads numbers of  classes
@@ -373,7 +352,6 @@ subroutine initialize()
     enddo
   enddo
   close(60)
-!      print*,trim(file_mineral),' has been read'
 
 
   allocate(vwc(n_lay,n_site),STAT=IERR)
@@ -407,8 +385,6 @@ subroutine initialize()
       endif
       n_bnd_lay(i,j+1)=layer_thick
       EE(J,I)=0
-!         write(*,'(3(f8.3),2(f12.1),3(f8.3))') vwc(J,I),a_coef(J,I),b_coef(J,I), &
-!          hcap_thw(J,I),hcap_frz(J,I),tcon_thw(J,I),tcon_frz(J,I),n_bnd_lay(i,j+1)
     enddo
     k=1
     n_lay_cur(I)=num_vl(veg_code(i))+num_gl(geo_code(i)) ! maximum number of soil layer = organic layers + mineral layers
@@ -878,7 +854,6 @@ real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
   return
 end
 !-------------------------------------------------------
-!subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
 subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 
   use gipl_bmi
@@ -892,7 +867,6 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
   real*8, intent(in) :: dz(n_grd)
   real*8, intent(inout) :: temps(n_grd)
   integer, intent(in) :: lay_idx(n_grd)
-  !real*8, intent(in) :: time_loop
   real*8 :: futemp,flux,fapp_hcap,ftcon,fsat_unf_water
 
   integer :: isite,i_grd,IT
@@ -1006,4 +980,3 @@ subroutine filexist(filename)
     stop
   endif
 end subroutine filexist!-----------------------------------------------
-
