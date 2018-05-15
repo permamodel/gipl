@@ -57,17 +57,15 @@ subroutine run_model(n_site, n_time)
   TINIR=0.0D0
   do while (time_loop.LT.time_e)
     do i_site=1,n_site
-      ! Set i_time as the "fraction of the year"
-      !i_time(i_site) = mod(int(time_loop), n_time) + 1
-6666  continue
       call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
         temp_grd(i_site))
-      time_loop=time_loop+time_step
+    enddo
+    time_loop=time_loop+time_step
+    do i_site=1,n_site
       if(i_time(i_site).LT.n_time)  then
         i_time(i_site)=i_time(i_site)+1
         call save_results(i_site,time_loop, time_restart)
         call active_layer(i_site)
-        GOTO 6666
       endif
     enddo
 
