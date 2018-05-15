@@ -45,6 +45,10 @@ subroutine run_model(n_site, n_time)
   real*8 :: time_loop                               ! main looping time
   integer :: i_site,j_time,i_grd,i_lay
 
+  ! Initialize the results array
+  do i_site=1,n_site
+    call save_results(i_site, 0.0D0, time_restart)
+  enddo
   time_s=time_step*DBLE(n_time*time_beg)
   time_e=time_step*DBLE(n_time*time_end)
   i_time=1
@@ -54,11 +58,7 @@ subroutine run_model(n_site, n_time)
     do i_site=1,n_site
       ! Set i_time as the "fraction of the year"
       !i_time(i_site) = mod(int(time_loop), n_time) + 1
-      call save_results(i_site,time_loop, time_restart)
 6666  continue
-
-      !do while (i_time(i_site).LT.n_time)
-      !write(*,*)time_loop, i_site, i_time, n_time
       call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
         temp_grd(i_site))
       time_loop=time_loop+time_step
@@ -66,12 +66,10 @@ subroutine run_model(n_site, n_time)
         i_time(i_site)=i_time(i_site)+1
         call save_results(i_site,time_loop, time_restart)
         call active_layer(i_site)
-        !    write(*,*) 'goto', i_time,time_loop
         GOTO 6666
       endif
-      !enddo
       if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
-        do j_time=1,n_time            ! WRITTING RESULTS
+        do j_time=1,n_time            ! WRITING RESULTS
           write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
         enddo
       endif
@@ -542,7 +540,6 @@ subroutine save_results(k, time2, restart_time)
   real*8 :: time2
   real*8 :: futemp,fsnow_level
 
-  !print*,'in time loop, time2 - time1:', time2 - time1
   RES(i_time(k),1)=time2 + restart_time
   RES(i_time(k),2)=futemp(time2,k)
   RES(i_time(k),3)=fsnow_level(k,time2)
