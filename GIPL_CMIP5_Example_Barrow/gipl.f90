@@ -11,14 +11,18 @@ end ! end of main program
 
 
 subroutine run_gipl2
+  use gipl_bmi
   use bnd
   use thermo
   use grd
   use alt
 
-  integer n_site, n_time
+  !character(64) :: fconfig
 
-  call initialize(n_site, n_time)
+  !call initialize(n_site, n_time)
+  fconfig='gipl_config.cfg'
+  call initialize()
+
   call run_model(n_site, n_time)
   call finalize(n_site, n_time)
 
@@ -150,7 +154,9 @@ subroutine finalize(n_site, n_time)
 end subroutine finalize
 
 
-subroutine initialize(n_site, n_time)
+!subroutine initialize(n_site, n_time)
+subroutine initialize()
+  use gipl_bmi
   use gipl_const
   use bnd
   use thermo
@@ -158,7 +164,7 @@ subroutine initialize(n_site, n_time)
   use alt
 
   implicit none
-  integer n_site, n_time
+  !integer n_site, n_time
 
   integer IREAD,ierr
   integer :: i,j,k,z_num,i_grd,j_time,i_site,i_lay
@@ -166,7 +172,7 @@ subroutine initialize(n_site, n_time)
 
   real*8 ,allocatable ::gtzone(:,:)
   character(64) :: stdummy
-  character(64) :: fconfig
+  !character(64) :: fconfig
 
   character(64) :: file_sites,file_bound,file_snow,file_rsnow,file_init
   character(64) :: file_grid,file_organic,file_mineral
@@ -184,7 +190,7 @@ subroutine initialize(n_site, n_time)
   real*8, allocatable :: z(:) ! vertical grid
   real*8 :: hcscale
 
-  fconfig='gipl_config.cfg'
+  !fconfig='gipl_config.cfg'
   call filexist(fconfig)
   open(60,file=fconfig)
 !read input files
@@ -469,6 +475,7 @@ end subroutine initialize
 
 subroutine init_cond(q,last)
 
+  use gipl_bmi
   use bnd
   use thermo
   use grd
@@ -496,6 +503,7 @@ end subroutine init_cond
 
 subroutine active_layer(k)
 
+  use gipl_bmi
   use bnd
   use thermo
   use grd
@@ -535,6 +543,7 @@ subroutine active_layer(k)
 end subroutine active_layer
 
 subroutine save_results(k, time2, restart_time)
+  use gipl_bmi
   use thermo
   use grd
   use alt
@@ -558,6 +567,7 @@ end subroutine save_results
 !__________________FUNCTIONS_____________________
 !________________________________________________
 real*8 function funf_water(T,NNN,I)
+  use gipl_bmi
   use thermo
   implicit none
   real*8, intent(in) :: T ! temprature
@@ -584,6 +594,7 @@ real*8 function funf_water(T,NNN,I)
 end function funf_water
 !-----------------------------------------------
 real*8 function fsat_unf_water(T,NNN,I)!Saturated unforzen water
+  use gipl_bmi
   use thermo
 
   implicit none
@@ -612,6 +623,7 @@ real*8 function fsat_unf_water(T,NNN,I)!Saturated unforzen water
 end function fsat_unf_water
 !-----------------------------------------------
 real*8 function fdunf_water(T,NNN,I)
+  use gipl_bmi
   use thermo
   implicit none
   real*8, intent(in) :: T ! temprature
@@ -639,6 +651,7 @@ real*8 function fdunf_water(T,NNN,I)
 end function fdunf_water
 !----------------------------------------
 real*8 function futemp(T,I)
+  use gipl_bmi
   use bnd
   implicit none
   real*8 T
@@ -719,6 +732,7 @@ subroutine assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
 end
 !----------------------------------------
 real*8 function fsnow_level(site_id,time)
+  use gipl_bmi
   use bnd
   real*8 :: time
   integer :: site_id,II
@@ -731,6 +745,7 @@ end function fsnow_level
 !-----------------------------------------------
 real*8 function ftcon(T,id,j,time_cur)
 
+  use gipl_bmi
   use bnd
   use grd
   use thermo
@@ -767,6 +782,7 @@ real*8 function ftcon(T,id,j,time_cur)
 end function ftcon
 !----------------------------------------
 real*8 function fhcap(T,NNUS,I)
+  use gipl_bmi
   use thermo
 
   implicit none
@@ -799,6 +815,7 @@ end function fhcap
 !----------------------------------------
 !----------------------------------------
 real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
+  use gipl_bmi
   use thermo
   use grd
 
@@ -856,6 +873,7 @@ end
 !-------------------------------------------------------
 subroutine stefan1D(temps,n_grd,dz,time_loop,isite,lay_idx,flux)
 
+  use gipl_bmi
   use thermo
   use bnd
   use gipl_const

@@ -6,8 +6,11 @@ CFLAGS=-c  #-Wall
 
 all: gipl
 
-gipl: gipl_mods.o gipl.o
-	$(CC) gipl_mods.o gipl.o -o gipl
+gipl: gipl_mods.o gipl.o gipl_bmi_mod.o
+	$(CC) gipl_bmi_mod.o gipl_mods.o gipl.o -o gipl
+
+gipl_bmi_mod.o: gipl_bmi_mod.f90
+	$(CC) $(CFLAGS) gipl_bmi_mod.f90
 
 gipl_mods.o: gipl_mods.f90
 	$(CC) $(CFLAGS) gipl_mods.f90
