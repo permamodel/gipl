@@ -60,16 +60,18 @@ subroutine run_model(n_site, n_time)
       call stefan1D(temp(i_site,:),n_grd,dz,time_loop,i_site,lay_id(i_site,:), &
         temp_grd(i_site))
     enddo
+
     time_loop=time_loop+time_step
-    do i_site=1,n_site
-      if(i_time(i_site).LT.n_time)  then
+
+    if (mod(int(time_loop), n_time) .ne. 0) then
+      ! Perform intra-year operations
+      do i_site=1,n_site
         i_time(i_site)=i_time(i_site)+1
         call save_results(i_site,time_loop, time_restart)
         call active_layer(i_site)
-      endif
-    enddo
-
-    if (mod(int(time_loop), n_time) .eq. 0) then
+      enddo
+    else
+      ! Perform year-end operations
       do i_site=1,n_site
         if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
           do j_time=1,n_time            ! WRITING RESULTS
@@ -80,10 +82,9 @@ subroutine run_model(n_site, n_time)
           res_save(i_grd,i_site)=sum((RES(:,i_grd)))
         enddo
       enddo
-    endif
 
-    if (mod(int(time_loop), n_time) .eq. 0) then
       i_time=1  ! this is an implicit array assignment
+
       do i_site=1,n_site
         frz_up_time_cur=-7777.D0
         frz_up_time_tot=frz_up_time_cur
@@ -102,7 +103,7 @@ subroutine run_model(n_site, n_time)
         call save_results(i_site,time_loop, time_restart)
         call active_layer(i_site)
 
-        ! WRITING MEAN
+        ! WRITE MEAN
         write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
           dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
         do j_time=1,n_time+2
