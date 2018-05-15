@@ -81,39 +81,41 @@ subroutine run_model(n_site, n_time)
       enddo
     enddo
 
-    i_time=1
-    do i_site=1,n_site
-      frz_up_time_cur=-7777.D0
-      frz_up_time_tot=frz_up_time_cur
-      do j_time=2,n_time
-        if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
-          if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+    if (mod(int(time_loop), n_time) .eq. 0) then
+      i_time=1
+      do i_site=1,n_site
+        frz_up_time_cur=-7777.D0
+        frz_up_time_tot=frz_up_time_cur
+        do j_time=2,n_time
+          if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
+            if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+          endif
+        enddo
+
+        if(frz_up_time_cur.GT.0.0)then
+          frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
+          if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
         endif
+        dfrz_frn=z_frz_frn(:,1,i_site)
+
+        call save_results(i_site,time_cur,time_loop)
+        call active_layer(i_site)
+
+        ! WRITING MEAN
+        write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
+          dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
+        do j_time=1,n_time+2
+          utemp_time_i(j_time)=time_cur+DBLE(j_time-1)*time_step
+        enddo
+        call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
+        call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
+        call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
+        call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
       enddo
+      call save_restart(n_site)
 
-      if(frz_up_time_cur.GT.0.0)then
-        frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
-        if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
-      endif
-      dfrz_frn=z_frz_frn(:,1,i_site)
-
-      call save_results(i_site,time_cur,time_loop)
-      call active_layer(i_site)
-
-      !____WRITTING MEAN
-      write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),i_grd=1,m_grd+3), &
-        dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
-      do j_time=1,n_time+2
-        utemp_time_i(j_time)=time_cur+DBLE(j_time-1)*time_step
-      enddo
-      call interpolate(utemp_time,utemp(:,i_site),n_temp,utemp_time_i,utemp_i(:,i_site),n_time+2)
-      call interpolate(snd_time,snd(:,i_site),n_snow,utemp_time_i,snd_i(:,i_site),n_time+2)
-      call snowfix(utemp_i(:,i_site),snd_i(:,i_site),n_time+2)
-      call interpolate(stcon_time,stcon(:,i_site),n_stcon,utemp_time_i,stcon_i(:,i_site),n_time+2)
-    enddo
-    call save_restart(n_site)
-
-    TINIR=time_loop
+      TINIR=time_loop
+    endif
   enddo
 
 end subroutine run_model
