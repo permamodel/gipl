@@ -69,15 +69,20 @@ subroutine run_model(n_site, n_time)
         call active_layer(i_site)
         GOTO 6666
       endif
-      if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
-        do j_time=1,n_time            ! WRITING RESULTS
-          write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
-        enddo
-      endif
-      do i_grd=1,m_grd+3
-        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
-      enddo
     enddo
+
+    if (mod(int(time_loop), n_time) .eq. 0) then
+      do i_site=1,n_site
+        if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
+          do j_time=1,n_time            ! WRITING RESULTS
+            write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
+          enddo
+        endif
+        do i_grd=1,m_grd+3
+          res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+        enddo
+      enddo
+    endif
 
     if (mod(int(time_loop), n_time) .eq. 0) then
       i_time=1  ! this is an implicit array assignment
