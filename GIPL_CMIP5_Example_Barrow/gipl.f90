@@ -30,7 +30,7 @@ program gipl2
     fconfig = 'gipl_config_3yr.cfg'
   endif
 
-  print*, 'Running from Fortran with config file: ', fconfig
+  print*,'Running from Fortran with config file: ', fconfig
 
   call run_gipl2
 end
@@ -45,19 +45,31 @@ subroutine run_gipl2
 
   implicit none
 
+  real*8 :: time_reference_counter
+
   ! if configuration file is defined elsewhere, use that
   ! otherwise, set a default here
-  if (fconfig .eq. '') fconfig='gipl_config_3yr.cfg'
-  !fconfig='gipl_config.cfg'
+  if (fconfig .eq. '') then
+    fconfig='gipl_config_3yr.cfg'
+    print *, 'No config file specified.  Using: ', fconfig
+  ! Full 135 year config file:
+  !   fconfig='gipl_config.cfg'
+  endif
 
   call initialize()
 
-  !call write_output()
+  ! Because we want to test both update() and update_until(), and because
+  ! there are write()s both the time of a year's timestep and the timestep
+  ! prior, we need two calls to write_output() at different points in
+  ! the annual cycle
   do while (time_loop .lt. time_e)
-    print*, 'top of loop with time_loop: ', time_loop
+    time_reference_counter = time_loop
     call update_model()
-    !call update_model_until(time_loop + (n_time - 1) * time_step)
-    !call update_model()
+    call update_model_until(time_reference_counter + (n_time - 3) * time_step)
+    call update_model()
+    call update_model()
+    call write_output()
+    call update_model()
     call write_output()
   enddo
 
@@ -164,30 +176,30 @@ subroutine write_output()
   endif
 
   ! Write mean results
-  do i_site=1,n_site
-    do i_grd=1,m_grd+3
-      res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+  if (mod(int(time_loop), n_time) .eq. n_time - 1) then
+    do i_site=1,n_site
+      do i_grd=1,m_grd+3
+        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+      enddo
     enddo
-  enddo
 
-  do i_site=1,n_site
-    frz_up_time_cur=-7777.D0
-    frz_up_time_tot=frz_up_time_cur
-    do j_time=2,n_time
-      if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
-        if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.&
-                frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+    do i_site=1,n_site
+      frz_up_time_cur=-7777.D0
+      frz_up_time_tot=frz_up_time_cur
+      do j_time=2,n_time
+        if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
+          if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.&
+                  frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+        endif
+      enddo
+
+      if(frz_up_time_cur.GT.0.0)then
+        frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
+        if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
       endif
+      dfrz_frn=z_frz_frn(:,1,i_site)
     enddo
 
-    if(frz_up_time_cur.GT.0.0)then
-      frz_up_time_tot=AMOD(frz_up_time_cur,REAL(n_time))
-      if(frz_up_time_tot.EQ.0.0)frz_up_time_tot=REAL(n_time)
-    endif
-    dfrz_frn=z_frz_frn(:,1,i_site)
-  enddo
-
-  if (mod(int(time_loop), n_time) .eq. 0) then
     do i_site=1,n_site
       write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
               i_grd=1,m_grd+3), &
