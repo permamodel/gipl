@@ -1,0 +1,6 @@
+echo "diff dump/mean.txt output_no_opt_5yr/mean.txt"
+diff dump/mean.txt output_no_opt_5yr/mean.txt
+echo "diff dump/result.txt output_no_opt_5yr/result.txt"
+diff dump/result.txt output_no_opt_5yr/result.txt
+echo "diff dump/start.txt output_no_opt_5yr/start.txt"
+diff dump/start.txt output_no_opt_5yr/start.txt
