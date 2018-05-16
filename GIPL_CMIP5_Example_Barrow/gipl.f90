@@ -46,6 +46,7 @@ subroutine run_gipl2
   implicit none
 
   real*8 :: time_reference_counter
+  real*8 :: run_time_loop
 
   character(64) :: passed_config_filename
 
@@ -70,6 +71,7 @@ subroutine run_gipl2
     time_reference_counter = time_loop
     call update_model()
     call update_model_until(time_reference_counter + (n_time - 3) * time_step)
+    call get_time_vars(run_time_loop)
     call update_model()
     call update_model()
     call write_output()
@@ -575,6 +577,8 @@ subroutine initialize(named_config_file)
   i_time=1  ! this is an implicit array assignment
   time_loop=0.0D0
   TINIR=0.0D0
+
+  print *, 'in fortran initialize(), time_e: ', time_e
 
 end subroutine initialize
 

@@ -1,8 +1,0 @@
-echo ". ./compile_f2p"
-. ./compile_f2p
-
-echo "python gipl_wrapper.py"
-python gipl_wrapper.py
-
-echo ". ./check_noopt_3yr "
-. ./check_noopt_3yr 
