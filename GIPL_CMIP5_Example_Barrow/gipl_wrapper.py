@@ -19,13 +19,33 @@ def print_usage():
     print(' ')
 
 
-if __name__ == '__main__':
+def list_so_routines(so_library):
     # This will print a list of all the routines in the Fortran shared library
-    #print(dir(f2py_gipl))
+    print(dir(so_library))
 
-    # The following just runs the single-call in the Fortran code
-    #f2py_gipl.run_gipl2()
 
+def run_as_fortran(so_library, cfg_file=None):
+    # this assumes the internal routine is 'run_gipl'
+    #
+    # Usage examples:
+    #      run_as_fortran(f2py_gipl)
+    #      run_as_fortran(f2py_gipl, cfg_file='gipl_config_3yr.cfg')
+    #      run_as_fortran(f2py_gipl, cfg_file='gipl_config.cfg')
+
+    if not cfg_file:
+        try:
+            cfg_file = sys.argv[1]
+            print('from python cmdlin, cfg_file is: {}'.format(cfg_file))
+        except IndexError:
+            cfg_file = ''
+            print('no cmdline arg, cfg_file is set to <none>')
+    else:
+        print('cfg_file passed from Python as: {}'.format(cfg_file))
+
+    so_library.run_gipl(cfg_file)
+
+
+def run_from_python_asif_fortran():
     if len(sys.argv) == 1:
         # Default case is to run the short 3-year monthly run
         f2py_gipl.initialize('gipl_config_3yr.cfg')
@@ -60,5 +80,9 @@ if __name__ == '__main__':
         python_time_loop += python_n_time
 
     f2py_gipl.finalize()
+
+
+if __name__ == '__main__':
+    run_from_python_asif_fortran()
 
     # End of __main__

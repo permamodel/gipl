@@ -32,24 +32,27 @@ program gipl2
 
   print*,'Running from Fortran with config file: ', fconfig
 
-  call run_gipl2
+  call run_gipl('')
 end
 
 
-subroutine run_gipl2
+subroutine run_gipl(filename_from_python)
   use gipl_bmi
-  !use bnd
-  !use thermo
-  !use grd
-  !use alt
 
   implicit none
-
   real*8 :: time_reference_counter
   real*8 :: run_time_loop
 
+  character(64) :: filename_from_python
   character(64) :: passed_config_filename
 
+  if (filename_from_python .ne. '') then
+    fconfig = filename_from_python
+    print*,'because of run_gipl() argument, set fconfig to: ', fconfig
+  else
+    print*,'no run_gipl() arg, using default value of fconfig'
+  endif
+  
   ! if configuration file is defined elsewhere, use that
   ! otherwise, set a default here
   if (fconfig .eq. '') then
@@ -59,8 +62,8 @@ subroutine run_gipl2
   !   fconfig='gipl_config.cfg'
   endif
 
-  ! Call initialize with the name of a configuration file
   passed_config_filename = fconfig
+
   call initialize(passed_config_filename)
 
   ! Because we want to test both update() and update_until(), and because
@@ -68,10 +71,10 @@ subroutine run_gipl2
   ! prior, we need two calls to write_output() at different points in
   ! the annual cycle
   do while (time_loop .lt. time_e)
+    print*, 'in fortran time_loop: ', time_loop
     time_reference_counter = time_loop
     call update_model()
     call update_model_until(time_reference_counter + (n_time - 3) * time_step)
-    call get_time_vars(run_time_loop)
     call update_model()
     call update_model()
     call write_output()
@@ -81,7 +84,7 @@ subroutine run_gipl2
 
   call finalize()
 
-end subroutine run_gipl2
+end subroutine run_gipl
 
 
 subroutine update_model_until(until_time)
@@ -577,8 +580,6 @@ subroutine initialize(named_config_file)
   i_time=1  ! this is an implicit array assignment
   time_loop=0.0D0
   TINIR=0.0D0
-
-  print *, 'in fortran initialize(), time_e: ', time_e
 
 end subroutine initialize
 
