@@ -39,6 +39,7 @@ end
 
 subroutine run_gipl(filename_from_python)
   use gipl_bmi
+  use alt, only : i_time
 
   implicit none
   real*8 :: time_reference_counter
@@ -69,13 +70,19 @@ subroutine run_gipl(filename_from_python)
   ! the annual cycle
   do while (time_loop .lt. time_e)
     print*, 'run_gipl time_loop: ', time_loop
+    print*, 'run_gipl i_time(1): ', i_time(1)
     time_reference_counter = time_loop
     call update_model()
+    print*, 'run_gipl i_time(1): ', i_time(1)
     call update_model_until(time_reference_counter + (n_time - 3) * time_step)
+    print*, 'run_gipl i_time(1): ', i_time(1)
     call update_model()
+    print*, 'run_gipl i_time(1): ', i_time(1)
     call update_model()
+    print*, 'run_gipl i_time(1): ', i_time(1)
     call write_output()
     call update_model()
+    print*, 'run_gipl i_time(1): ', i_time(1)
     call write_output()
   enddo
 
@@ -111,6 +118,7 @@ subroutine update_model()
   integer :: i_site,j_time
 
   do i_site=1,n_site
+    print*, '  calling stefan1D with values at i_time(i_site):', i_time(i_site)
     call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
       temp_grd(i_site))
   enddo
