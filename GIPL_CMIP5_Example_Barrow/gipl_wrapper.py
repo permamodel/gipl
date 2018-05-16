@@ -46,6 +46,9 @@ def run_as_fortran(so_library, cfg_file=None):
 
 
 def run_from_python_asif_fortran():
+    # Sample usage:
+    #    run_from_python_asif_fortran()
+
     if len(sys.argv) == 1:
         # Default case is to run the short 3-year monthly run
         f2py_gipl.initialize('gipl_config_3yr.cfg')
@@ -83,6 +86,44 @@ def run_from_python_asif_fortran():
 
 
 if __name__ == '__main__':
-    run_from_python_asif_fortran()
+
+    if len(sys.argv) == 1:
+        # Default case is to run the short 3-year monthly run
+        f2py_gipl.initialize('gipl_config_3yr.cfg')
+    else:
+        # Note: Fortran error just stops the code, so can't trap an Exception
+        f2py_gipl.initialize(sys.argv[1])
+
+    # Modify the end time for this loop
+    python_time_e = f2py_gipl.get_float_val('time_e')
+    print('After initialization, time_e is: {}'.format(python_time_e))
+
+    time_e_newval = 21.0
+    f2py_gipl.set_float_val('time_e', time_e_newval)
+    python_time_e = f2py_gipl.get_float_val('time_e')
+    print('After setting time_e to {}, time_e is: {}'.format(
+        time_e_newval, python_time_e))
+
+    # Get the time parameters from the Fortran code
+    python_time_loop = f2py_gipl.get_float_val('time_loop')
+    python_time_step = f2py_gipl.get_float_val('time_step')
+    python_time_e = f2py_gipl.get_float_val('time_e')
+    python_n_time = f2py_gipl.get_float_val('n_time')
+
+    while python_time_loop < python_time_e:
+        print('in python, time_loop: {}'.format(python_time_loop))
+
+        f2py_gipl.update_model()
+        f2py_gipl.update_model_until(
+            python_time_loop + (python_n_time - 3) * python_time_step)
+        f2py_gipl.update_model()
+        f2py_gipl.update_model()
+        f2py_gipl.write_output()
+        f2py_gipl.update_model()
+        f2py_gipl.write_output()
+
+        python_time_loop += python_n_time
+
+    f2py_gipl.finalize()
 
     # End of __main__
