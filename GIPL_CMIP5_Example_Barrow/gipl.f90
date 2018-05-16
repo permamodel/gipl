@@ -126,6 +126,10 @@ subroutine update_model()
     enddo
   else
     ! Perform year-end operations
+    ! This section interpolates snd and stcon values to snd_i and stcon_i
+    ! for use in the computations above
+    ! This means that there isn't a clear set-the-value-at-this-time
+    ! operation without computing how to index such a time
     i_time=1  ! this is an implicit array assignment
 
     do i_site=1,n_site
@@ -540,12 +544,13 @@ subroutine initialize(named_config_file)
   call  assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
   call init_cond(restart,n_site)
 
-  ! allocating interval varialbe after interation
+  ! allocating interval variable after interation
   allocate(utemp_time_i(n_time+2),STAT=IERR)
   allocate(utemp_i(n_time+2,n_site),STAT=IERR)
   allocate(snd_i(n_time+2,n_site),STAT=IERR)
   allocate(stcon_i(n_time+2,n_site),STAT=IERR)
 
+  ! Interpolate values for the first year
   do j_time=1,n_time+2
     utemp_time_i(j_time)=time_restart+DBLE(j_time-1)*time_step
   enddo
