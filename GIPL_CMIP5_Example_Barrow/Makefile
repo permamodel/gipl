@@ -6,7 +6,7 @@ CFLAGS=-c  -Wall
 
 all: gipl
 
-gipl: gipl_mods.o gipl.o gipl_bmi_mod.o
+gipl: gipl.o
 	$(CC) gipl_bmi_mod.o gipl_mods.o gipl.o -o gipl
 
 #gipl_bmi.mod: gipl_bmi_mod.o gipl_bmi_mod.f90
@@ -26,5 +26,5 @@ clean:
 
 clean_all:
 
-	rm *o *.mod gipl
+	rm *.o *.mod gipl
 

@@ -871,13 +871,16 @@ real*8 function ftcon(T,id,j,time_cur)
   gr_sur=sea_level
   dsnow=sea_level-fsnow_level(id,time_cur)
   NS=lay_id(id,j)
-  if(zdepth(j).le.dsnow)then                                  !atmosphere
+  if(zdepth(j).le.dsnow)then
+    !atmosphere
     ftcon=1.d4
-  elseif (zdepth(j).Lt.gr_sur)then                            !snow
+  elseif (zdepth(j).Lt.gr_sur)then
+    !snow
     II=1+IDINT((time_cur-tinir)/time_step)
     ftcon=stcon_i(II,id)+(time_cur+time_restart-utemp_time_i(II))* &
       (stcon_i(II+1,id)-stcon_i(II,id))/(utemp_time_i(II+1)-utemp_time_i(II))
-  else                                                        !ground
+  else
+    !ground
     WC=funf_water(T,NS,id)/vwc(NS,id)
     ftcon=(tcon_thw(NS,id)**WC)*(tcon_frz(NS,id)**(1.0-WC))
   endif

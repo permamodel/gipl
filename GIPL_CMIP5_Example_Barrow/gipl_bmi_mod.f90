@@ -8,17 +8,15 @@ module gipl_bmi
   real*8, save :: time_beg,time_end
   real*8, save :: time_s, time_e
 
-!  subroutine bmi_initialize(config_filename)
-!    use gipl_const
-!    use bnd
-!    use thermo
-!    use grd
-!    use alt
-!
-!    implicit none
-!
-!    fconfig = config_filename
-!    initialize(n_site, n_time)
-!  end subroutine bmi_initialize
+  ! Input arrays
+
+  ! upper boundary snow time and snow depth (input)
+  real*8 ,allocatable,dimension(:,:):: snd(:,:)
+
+  ! time and upper boundary temprature (interpolated)
+  real*8,allocatable,dimension(:,:)::  utemp(:,:)
+
+  ! snow thermal conductivity time and itself (input)
+  real*8 ,allocatable,dimension(:,:):: stcon(:,:)
 
 end module gipl_bmi

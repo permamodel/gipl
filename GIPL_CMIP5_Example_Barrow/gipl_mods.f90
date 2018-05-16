@@ -10,15 +10,18 @@ end module gipl_const
 module bnd
   integer :: n_temp                                       ! number of upper boundary points for temperature (input)
   real*8,allocatable,dimension(:)::  utemp_time         ! upper boundary time and temperature (input)
-  real*8,allocatable,dimension(:,:)::  utemp         ! upper boundary time and temperature (input)
+  ! utemp is moved to gipl_bmi.mod
+  !real*8,allocatable,dimension(:,:)::  utemp         ! upper boundary time and temperature (input)
   real*8,allocatable,dimension(:)::  utemp_time_i(:)     ! time and upper boundary temprature (interpolated)
   real*8,allocatable,dimension(:,:)::  utemp_i(:,:)     ! time and upper boundary temprature (interpolated)
   integer :: n_snow                                       ! number of upper boundary points for snow (input)
   real*8 ,allocatable,dimension(:):: snd_time(:)              ! upper boundary snow time and snow depth (input)
-  real*8 ,allocatable,dimension(:,:):: snd(:,:)              ! upper boundary snow time and snow depth (input)
+  ! snd is moved to gipl_bmi.mod
+  !real*8 ,allocatable,dimension(:,:):: snd(:,:)              ! upper boundary snow time and snow depth (input)
   integer :: n_stcon
   real*8 ,allocatable,dimension(:):: stcon_time(:)          ! snow thermal conductivity time and itself (input)
-  real*8 ,allocatable,dimension(:,:):: stcon(:,:)          ! snow thermal conductivity time and itself (input)
+  ! stcon is moved to gipl_bmi.mod
+  !real*8 ,allocatable,dimension(:,:):: stcon(:,:)          ! snow thermal conductivity time and itself (input)
   real*8 ,allocatable,dimension(:,:):: snd_i (:,:)        ! snow depth and thermal conductivity (interpolated)
   real*8 ,allocatable,dimension(:,:):: stcon_i (:,:)        ! snow depth and thermal conductivity (interpolated)
   real*8 :: TINIR
