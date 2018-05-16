@@ -3,6 +3,7 @@
 !
 ! Routines permitting access to gipl variables from python
 !
+! Note: All names are converted to lower case for f2py
 
 !subroutine get_time_vars(new_time_loop)
 !  use gipl_bmi
@@ -81,6 +82,7 @@ end subroutine
 
 subroutine get_int_val(var_name, var_val)
   use gipl_bmi
+  use grd
 
   implicit none
 
@@ -92,6 +94,8 @@ subroutine get_int_val(var_name, var_val)
 
   if (var_name .eq. 'n_time') then
     var_val = n_time
+  elseif (var_name .eq. 'n_grd') then
+    var_val = n_grd
   else
     print*,'Fortran BMI error: get_int_var not recognized: ', var_name
   endif
@@ -153,7 +157,77 @@ subroutine set_string_val(var_name, var_val)
   if (var_name .eq. 'fconfig') then
     fconfig = var_val
   else
-    print*,'Fortran BMI error: get_string_var not recognized: ', var_name
+    print*,'Fortran BMI error: set_string_var not recognized: ', var_name
   endif
+
+end subroutine
+
+
+subroutine get_array1d(array_name, array_dim, return_array)
+  use gipl_bmi
+  use grd
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: array_dim
+  real*8, dimension(array_dim) :: return_array
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: array_dim
+!f2py intent(out) :: return_array
+
+  if (array_name .eq. 'zdepth') then
+    return_array = zdepth
+  else
+    print*,'Fortran BMI error: get_array1d name not recognized: ', array_name
+    return_array = 0
+  endif
+
+end subroutine
+
+
+!subroutine set_array1d(array_name, array_dim, array_values)
+!subroutine set_array1d(array_dim, array_name, array_values)
+!subroutine set_array1d(array_dim, array_values, array_name)
+!subroutine set_array1d(array_dim, array_values)!, array_name)
+!subroutine set_array1d(array_dim)!, array_values)!, array_name)
+subroutine set_array1d(array_values, array_dim, val)!, array_values)!, array_name)
+  use gipl_bmi
+  use grd
+
+  implicit none
+
+  real*8, dimension(array_dim) :: array_values
+  integer :: array_dim
+  integer :: val
+  !character(64) :: array_name
+
+!f2py intent(in) :: array_values
+!f2py intent(in, hide) :: array_dim
+!!f2py intent(in) :: array_name
+
+  !print*, 'in set_array1d, array_name: ', array_name
+  print*, 'in set_array1d, array_dim: ', array_dim
+  print*, 'in set_array1d, val: ', val
+
+  print*, 'in set_array1d, array_values: ', array_values
+  stop
+
+  !print*, array_values(1)
+
+
+  print*, 'Stopping in gipl_bmi.f90'
+  stop
+  !print*, 'JUST DO IT...Assigning zdepth...'
+  !  zdepth = array_values
+  !if (array_name .eq. 'zdepth') then
+  !  print*, 'Assigning zdepth...'
+  !  zdepth = array_values
+  !else
+  !  print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+  !    array_name
+  !  zdepth = 0
+  !endif
 
 end subroutine

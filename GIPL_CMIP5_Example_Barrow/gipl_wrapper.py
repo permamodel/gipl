@@ -2,13 +2,20 @@
 gipl_wrapper.py
 
 Python 2 code to run the f2py-created gipl 'library'
+
+Note: all names are converted to lower case for f2py
+
 """
 
 from __future__ import print_function
 
-#import numpy
 import sys
+import numpy as np
 import f2py_gipl
+
+
+# Unset the default of printing numpy arrays in scientific notation
+np.set_printoptions(suppress=True)
 
 
 def print_usage():
@@ -121,9 +128,71 @@ def modify_gipl_strings():
     print('  python_fconfig is: {}'.format(python_fconfig))
 
 
+def get_gipl_array(array_name):
+    # Not sure how to generically send info to f2py
+    # without manually editing a signature file, so this stands between
+    if array_name == 'zdepth':
+        # zdepth is a 1-D array in depth
+        n_levels = f2py_gipl.get_int_val('n_grd')
+        print('n_levels of zdepth grid: {}'.format(n_levels))
+        returned_array = f2py_gipl.get_array1d('zdepth', n_levels)
+        #returned_array = f2py_gipl.get_array1d('zdepth')
+    else:
+        print('in get_float_val(), array_name not recognized: {}'.format(
+            array_name))
+        raise ValueError('unrecognized array_name in get_gipl_array()')
+
+    return returned_array
+
+
+def set_gipl_array(array_name, array_values):
+    # Not sure how to generically send info to f2py
+    # without manually editing a signature file, so this stands between
+    if array_name == 'zdepth':
+        # zdepth is a 1-D array in depth
+        assert array_values.ndim == 1
+        n_levels = f2py_gipl.get_int_val('n_grd')
+        assert array_values.size == n_levels
+        print('zdepth has {} values'.format(n_levels))
+        #f2py_gipl.set_array1d('zdepth', n_levels, array_values)
+        #f2py_gipl.set_array1d(n_levels, 'zdepth', array_values)
+        #f2py_gipl.set_array1d(n_levels, array_values, 'zdepth')
+        #f2py_gipl.set_array1d(n_levels, array_values)#, 'zdepth')
+        #f2py_gipl.set_array1d(n_levels)#, array_values)#, 'zdepth')
+        f2py_gipl.set_array1d(array_values, 123.45)#, n_levels)#, array_values)#, 'zdepth')
+    else:
+        print('in set_gipl_array(), array_name not recognized: {}'.format(
+            array_name))
+        raise ValueError('unrecognized array_name in get_gipl_array()')
+
+
 if __name__ == '__main__':
+    list_so_routines(f2py_gipl)
+
     # Initialize the GIPL model in the Fortran code
     initialize_f2py_gipl()
+
+    depth_array = get_gipl_array('zdepth')
+    print('depth_array as originally set:')
+    print(depth_array[:10])
+    print('depth_array flags:')
+    print(depth_array.flags)
+    print('\n')
+
+
+    new_depth_array = np.subtract(depth_array, 1.0)
+    print('depth_array as modified in python:')
+    print('new_depth_array:')
+    print(new_depth_array[:10])
+    print('new_depth_array.flags:')
+    print(new_depth_array.flags)
+    print('\n')
+
+    set_gipl_array('zdepth', new_depth_array)
+
+    depth_array = get_gipl_array('zdepth')
+    print('depth_array retrieved from fortran after editing:')
+    print(depth_array[:10])
 
     # Get the time parameters from the Fortran code
     python_time_loop = f2py_gipl.get_float_val('time_loop')
