@@ -85,15 +85,8 @@ def run_from_python_asif_fortran():
     f2py_gipl.finalize()
 
 
-if __name__ == '__main__':
-
-    if len(sys.argv) == 1:
-        # Default case is to run the short 3-year monthly run
-        f2py_gipl.initialize('gipl_config_3yr.cfg')
-    else:
-        # Note: Fortran error just stops the code, so can't trap an Exception
-        f2py_gipl.initialize(sys.argv[1])
-
+def modify_time_e():
+    # Example of using get_float_val() and set_float_val()
     # Modify the end time for this loop
     python_time_e = f2py_gipl.get_float_val('time_e')
     print('After initialization, time_e is: {}'.format(python_time_e))
@@ -103,6 +96,19 @@ if __name__ == '__main__':
     python_time_e = f2py_gipl.get_float_val('time_e')
     print('After setting time_e to {}, time_e is: {}'.format(
         time_e_newval, python_time_e))
+
+
+def initialize_f2py_gipl():
+    if len(sys.argv) == 1:
+        # Default case is to run the short 3-year monthly run
+        f2py_gipl.initialize('gipl_config_3yr.cfg')
+    else:
+        # Note: Fortran error just stops the code, so can't trap an Exception
+        f2py_gipl.initialize(sys.argv[1])
+
+
+if __name__ == '__main__':
+    initialize_f2py_gipl()
 
     # Get the time parameters from the Fortran code
     python_time_loop = f2py_gipl.get_float_val('time_loop')
