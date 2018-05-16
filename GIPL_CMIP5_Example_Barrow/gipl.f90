@@ -68,7 +68,7 @@ subroutine run_gipl(filename_from_python)
   ! prior, we need two calls to write_output() at different points in
   ! the annual cycle
   do while (time_loop .lt. time_e)
-    print*, 'in fortran time_loop: ', time_loop
+    print*, 'run_gipl time_loop: ', time_loop
     time_reference_counter = time_loop
     call update_model()
     call update_model_until(time_reference_counter + (n_time - 3) * time_step)
@@ -117,24 +117,25 @@ subroutine update_model()
 
   time_loop=time_loop+time_step
 
-  if (mod(int(time_loop), n_time) .ne. 0) then
-    ! Perform intra-year operations
-    do i_site=1,n_site
-      i_time(i_site)=i_time(i_site)+1
-      call save_results(i_site,time_loop, time_restart)
-      call active_layer(i_site)
-    enddo
-  else
+  do i_site=1,n_site
+    if (mod(int(time_loop), n_time) .eq. 0) then
+      i_time(i_site) = 1
+    else
+      i_time(i_site) = i_time(i_site)+1
+    endif
+    call save_results(i_site,time_loop, time_restart)
+    call active_layer(i_site)
+  enddo
+
+  !if (mod(int(time_loop), n_time) .ne. 0) then
+  if (mod(int(time_loop), n_time) .eq. 0) then
     ! Perform year-end operations
     ! This section interpolates snd and stcon values to snd_i and stcon_i
     ! for use in the computations above
     ! This means that there isn't a clear set-the-value-at-this-time
     ! operation without computing how to index such a time
-    i_time=1  ! this is an implicit array assignment
-
     do i_site=1,n_site
-      call save_results(i_site,time_loop, time_restart)
-      call active_layer(i_site)
+      i_time(i_site) = 1
 
       do j_time=1,n_time+2
         utemp_time_i(j_time)= &

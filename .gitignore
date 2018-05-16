@@ -10,6 +10,8 @@ dump/
 .DS_Store
 GIPL_CMIP5_Example_Barrow_f2py/
 out
+out1
+out2
 aux
 
 ### Added from: 
