@@ -96,6 +96,8 @@ subroutine get_int_val(var_name, var_val)
     var_val = n_time
   elseif (var_name .eq. 'n_grd') then
     var_val = n_grd
+  elseif (var_name .eq. 'n_site') then
+    var_val = n_site
   else
     print*,'Fortran BMI error: get_int_var not recognized: ', var_name
   endif
@@ -187,7 +189,7 @@ subroutine get_array1d(array_name, array_dim, return_array)
 end subroutine
 
 
-subroutine set_array1d(array_name, array_values, array_dim)!, array_name)
+subroutine set_array1d(array_name, array_values, array_dim)
   use gipl_bmi
   use grd
 
@@ -207,7 +209,64 @@ subroutine set_array1d(array_name, array_values, array_dim)!, array_name)
   else
     print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
       array_name
-    zdepth = 0
+    stop
   endif
 
 end subroutine
+
+
+subroutine get_array2d(array_name, xdim, ydim, return_array)
+  use gipl_bmi
+  use grd
+  use thermo  ! provides temp
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: xdim, ydim
+  real*8, dimension(xdim, ydim) :: return_array
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: xdim, ydim
+!f2py intent(out) :: return_array
+
+  if (array_name .eq. 'temp') then
+    print*, 'in get_array2d, temp is:'
+    print*, temp
+    return_array = temp
+  else
+    print*,'Fortran BMI error: get_array2d name not recognized: ', array_name
+    return_array = 0
+  endif
+
+end subroutine
+
+
+subroutine set_array2d(array_name, array_values, xdim, ydim)
+  use gipl_bmi
+  use grd
+  use thermo  ! provides temp
+
+  implicit none
+
+  character(64) :: array_name
+  real*8, dimension(xdim, ydim) :: array_values
+  integer :: xdim, ydim
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: array_values
+!f2py intent(in, hide) :: xdim, ydim
+
+  if (array_name .eq. 'temp') then
+    print*, 'Assigning temp...'
+    print*, 'xdim: ', xdim
+    print*, 'ydim: ', ydim
+    temp = array_values
+  else
+    print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+      array_name
+    stop
+  endif
+
+end subroutine
+

@@ -137,6 +137,13 @@ def get_gipl_array(array_name):
         print('n_levels of zdepth grid: {}'.format(n_levels))
         returned_array = f2py_gipl.get_array1d('zdepth', n_levels)
         #returned_array = f2py_gipl.get_array1d('zdepth')
+    elif array_name == 'temp':
+        # temp is a 2-D array in depth
+        xdim = f2py_gipl.get_int_val('n_site')
+        ydim = f2py_gipl.get_int_val('n_grd')
+        print('xdim = n_site = {}'.format(xdim))
+        print('ydim = n_grd = {}'.format(ydim))
+        returned_array = f2py_gipl.get_array2d('temp', xdim, ydim)
     else:
         print('in get_float_val(), array_name not recognized: {}'.format(
             array_name))
@@ -154,14 +161,19 @@ def set_gipl_array(array_name, array_values):
         n_levels = f2py_gipl.get_int_val('n_grd')
         assert array_values.size == n_levels
         f2py_gipl.set_array1d(array_name, array_values)
+    if array_name == 'temp':
+        # temp is a 2-D array in location, value
+        assert array_values.ndim == 2
+        f2py_gipl.set_array2d(array_name, array_values)
     else:
         print('in set_gipl_array(), array_name not recognized: {}'.format(
             array_name))
-        raise ValueError('unrecognized array_name in get_gipl_array()')
+        raise ValueError('unrecognized array_name in set_gipl_array()')
 
 
 def array1d_assignment_example():
     # Show an example of using get_gipl_array() and set_gipl_array()
+    # with 1D arrays
     depth_array = get_gipl_array('zdepth')
     print('depth_array as originally set:')
     print(depth_array)
@@ -179,6 +191,27 @@ def array1d_assignment_example():
     depth_array = get_gipl_array('zdepth')
     print('depth_array retrieved from fortran after editing:')
     print(depth_array)
+
+
+def array2d_assignment_example():
+    # Show an example of using get_gipl_array() and set_gipl_array()
+    # with 2D arrays
+    temp_array = get_gipl_array('temp')
+    print('temp_array as originally set:')
+    print(temp_array)
+    print('\n')
+
+    new_temp_array = np.subtract(temp_array, 1.0)
+    print('temp_array as modified in python:')
+    print('new_temp_array:')
+    print(new_temp_array)
+    print('\n')
+
+    set_gipl_array('temp', new_temp_array)
+
+    temp_array = get_gipl_array('temp')
+    print('temp_array retrieved from fortran after editing:')
+    print(temp_array)
 
 
 if __name__ == '__main__':
