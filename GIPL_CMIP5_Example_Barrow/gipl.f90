@@ -39,7 +39,6 @@ end
 
 subroutine run_gipl(filename_from_python)
   use gipl_bmi
-  use alt, only : i_time
 
   implicit none
   real*8 :: time_reference_counter
@@ -70,19 +69,22 @@ subroutine run_gipl(filename_from_python)
   ! the annual cycle
   do while (time_loop .lt. time_e)
     print*, 'run_gipl time_loop: ', time_loop
-    print*, 'run_gipl i_time(1): ', i_time(1)
     time_reference_counter = time_loop
+
+    ! Note: if an adjustment to surface temperature, snow depth, or stcon
+    !    is to be made, it should be made before a call to update_model()
+    !    and to the internal-interpolated grids:
+    !       utemp_i(i_time(i_site)))
+    !       snd_i(i_time(i_site)))
+    !       stcon_i(i_time(i_site)))
+    !    These values were interpolated for the following year at the end
+    !      of the previous year in update_model() (or initialize() for 1st yr
     call update_model()
-    print*, 'run_gipl i_time(1): ', i_time(1)
     call update_model_until(time_reference_counter + (n_time - 3) * time_step)
-    print*, 'run_gipl i_time(1): ', i_time(1)
     call update_model()
-    print*, 'run_gipl i_time(1): ', i_time(1)
     call update_model()
-    print*, 'run_gipl i_time(1): ', i_time(1)
     call write_output()
     call update_model()
-    print*, 'run_gipl i_time(1): ', i_time(1)
     call write_output()
   enddo
 
@@ -118,7 +120,6 @@ subroutine update_model()
   integer :: i_site,j_time
 
   do i_site=1,n_site
-    print*, '  calling stefan1D with values at i_time(i_site):', i_time(i_site)
     call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
       temp_grd(i_site))
   enddo
@@ -142,6 +143,7 @@ subroutine update_model()
     ! for use in the computations above
     ! This means that there isn't a clear set-the-value-at-this-time
     ! operation without computing how to index such a time
+
     do i_site=1,n_site
       i_time(i_site) = 1
 
