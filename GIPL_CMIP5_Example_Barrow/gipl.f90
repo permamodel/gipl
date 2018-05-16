@@ -47,6 +47,8 @@ subroutine run_gipl2
 
   real*8 :: time_reference_counter
 
+  character(64) :: passed_config_filename
+
   ! if configuration file is defined elsewhere, use that
   ! otherwise, set a default here
   if (fconfig .eq. '') then
@@ -56,7 +58,9 @@ subroutine run_gipl2
   !   fconfig='gipl_config.cfg'
   endif
 
-  call initialize()
+  ! Call initialize with the name of a configuration file
+  passed_config_filename = fconfig
+  call initialize(passed_config_filename)
 
   ! Because we want to test both update() and update_until(), and because
   ! there are write()s both the time of a year's timestep and the timestep
@@ -242,7 +246,7 @@ subroutine finalize()
 end subroutine finalize
 
 
-subroutine initialize()
+subroutine initialize(named_config_file)
   use gipl_bmi
   use gipl_const
   use bnd
@@ -252,7 +256,9 @@ subroutine initialize()
 
   implicit none
 
-  integer IREAD,ierr
+  character(64) :: named_config_file
+
+  integer :: IREAD,ierr
   integer :: i,j,k,z_num,i_grd,j_time,i_site,i_lay
 
 
@@ -274,6 +280,11 @@ subroutine initialize()
   integer :: gln
   real*8, allocatable :: z(:) ! vertical grid
   real*8 :: hcscale
+
+  ! Use the filename passed to this routine for fconfig
+  fconfig = named_config_file
+
+  print*, 'in initialization() with fname: ', named_config_file
 
   call filexist(fconfig)
   open(60,file=fconfig)
