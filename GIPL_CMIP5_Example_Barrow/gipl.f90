@@ -10,6 +10,28 @@
 ! Please cite Jafarov et al., (2012) work when using it.
 
 program gipl2
+  use gipl_bmi
+
+  implicit none
+
+  !character(64) :: arg1
+
+  !write(6,'(3(a))'), 'fconfig before calling:***',fconfig,'***'
+  !if (fconfig .eq. '') print*, 'empty fconfig'
+  !call getarg(1, arg1)
+  !arg1 = trim(arg1)
+  !print*,'len arg1: ', len(arg1)
+  !print*,'arg1: ', arg1
+  !print*,'iargc:', iargc()
+
+  if (iargc() .eq. 1) then
+    call getarg(1, fconfig)
+  else
+    fconfig = 'gipl_config_3yr.cfg'
+  endif
+
+  print*, 'Running from Fortran with config file: ', fconfig
+
   call run_gipl2
 end
 
@@ -23,14 +45,19 @@ subroutine run_gipl2
 
   implicit none
 
+  ! if configuration file is defined elsewhere, use that
+  ! otherwise, set a default here
+  if (fconfig .eq. '') fconfig='gipl_config_3yr.cfg'
   !fconfig='gipl_config.cfg'
-  fconfig='gipl_config_3yr.cfg'
+
   call initialize()
 
+  !call write_output()
   do while (time_loop .lt. time_e)
+    print*, 'top of loop with time_loop: ', time_loop
     call update_model()
-    call update_model_until(time_loop + (n_time - 1) * time_step)
-    call update_model()
+    !call update_model_until(time_loop + (n_time - 1) * time_step)
+    !call update_model()
     call write_output()
   enddo
 

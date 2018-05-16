@@ -2,7 +2,7 @@ module gipl_bmi
 
   integer, save :: n_site
   integer, save :: n_time
-  character(64), save :: fconfig
+  character(64), save :: fconfig = ""
   real*8, save :: time_loop
   real*8, save :: time_step
   real*8, save :: time_beg,time_end
