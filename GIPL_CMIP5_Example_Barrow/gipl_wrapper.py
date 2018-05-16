@@ -107,14 +107,29 @@ def initialize_f2py_gipl():
         f2py_gipl.initialize(sys.argv[1])
 
 
+def modify_gipl_strings():
+    # Test string routines between fortran and python
+    python_fconfig = f2py_gipl.get_string_val('fconfig')
+    print('After setting from fortran, python_fconfig is: {}'.format(
+        python_fconfig))
+
+    new_string_val = 'gipl_config.cfg'
+    f2py_gipl.set_string_val('fconfig', new_string_val)
+
+    python_fconfig = f2py_gipl.get_string_val('fconfig')
+    print('After setting fron python and getting from fortran,')
+    print('  python_fconfig is: {}'.format(python_fconfig))
+
+
 if __name__ == '__main__':
+    # Initialize the GIPL model in the Fortran code
     initialize_f2py_gipl()
 
     # Get the time parameters from the Fortran code
     python_time_loop = f2py_gipl.get_float_val('time_loop')
     python_time_step = f2py_gipl.get_float_val('time_step')
     python_time_e = f2py_gipl.get_float_val('time_e')
-    python_n_time = f2py_gipl.get_float_val('n_time')
+    python_n_time = f2py_gipl.get_int_val('n_time')
 
     while python_time_loop < python_time_e:
         print('in python, time_loop: {}'.format(python_time_loop))

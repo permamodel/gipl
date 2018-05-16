@@ -1,7 +1,10 @@
 # mrc: make, run, compare
 make clean
+echo "rm ./dump/mean.txt"
 rm ./dump/mean.txt
+echo "rm ./dump/start.txt"
 rm ./dump/start.txt
+echo "rm ./dump/result.txt"
 rm ./dump/result.txt
 make
 ./gipl

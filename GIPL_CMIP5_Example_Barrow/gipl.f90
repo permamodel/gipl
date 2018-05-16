@@ -14,6 +14,7 @@ program gipl2
 
   implicit none
 
+  character(64) :: empty_filename = ''
   !character(64) :: arg1
 
   !write(6,'(3(a))'), 'fconfig before calling:***',fconfig,'***'
@@ -32,7 +33,7 @@ program gipl2
 
   print*,'Running from Fortran with config file: ', fconfig
 
-  call run_gipl('')
+  call run_gipl(empty_filename)
 end
 
 
@@ -41,16 +42,12 @@ subroutine run_gipl(filename_from_python)
 
   implicit none
   real*8 :: time_reference_counter
-  real*8 :: run_time_loop
 
   character(64) :: filename_from_python
   character(64) :: passed_config_filename
 
   if (filename_from_python .ne. '') then
     fconfig = filename_from_python
-    print*,'because of run_gipl() argument, set fconfig to: ', fconfig
-  else
-    print*,'no run_gipl() arg, using default value of fconfig'
   endif
   
   ! if configuration file is defined elsewhere, use that
@@ -286,10 +283,16 @@ subroutine initialize(named_config_file)
   real*8, allocatable :: z(:) ! vertical grid
   real*8 :: hcscale
 
-  ! Use the filename passed to this routine for fconfig
-  fconfig = named_config_file
-
-  print*, 'in initialization() with fname: ', named_config_file
+  ! For now, the pre-set value of fconfig takes priority over the passed value
+  if (fconfig .eq. '') then
+    ! No pre-set fconfig, use named_config if it exists, or a default if not
+    if (named_config_file .eq. '') then
+      ! If nothing is specified, use this default configuration file
+      fconfig = 'gipl_config_3yr.cfg'
+    else
+      fconfig = named_config_file
+    endif
+  endif
 
   call filexist(fconfig)
   open(60,file=fconfig)
