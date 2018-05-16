@@ -187,12 +187,7 @@ subroutine get_array1d(array_name, array_dim, return_array)
 end subroutine
 
 
-!subroutine set_array1d(array_name, array_dim, array_values)
-!subroutine set_array1d(array_dim, array_name, array_values)
-!subroutine set_array1d(array_dim, array_values, array_name)
-!subroutine set_array1d(array_dim, array_values)!, array_name)
-!subroutine set_array1d(array_dim)!, array_values)!, array_name)
-subroutine set_array1d(array_values, array_dim, val)!, array_values)!, array_name)
+subroutine set_array1d(array_name, array_values, array_dim)!, array_name)
   use gipl_bmi
   use grd
 
@@ -200,34 +195,19 @@ subroutine set_array1d(array_values, array_dim, val)!, array_values)!, array_nam
 
   real*8, dimension(array_dim) :: array_values
   integer :: array_dim
-  integer :: val
-  !character(64) :: array_name
+  character(64) :: array_name
 
 !f2py intent(in) :: array_values
 !f2py intent(in, hide) :: array_dim
-!!f2py intent(in) :: array_name
+!f2py intent(in) :: array_name
 
-  !print*, 'in set_array1d, array_name: ', array_name
-  print*, 'in set_array1d, array_dim: ', array_dim
-  print*, 'in set_array1d, val: ', val
-
-  print*, 'in set_array1d, array_values: ', array_values
-  stop
-
-  !print*, array_values(1)
-
-
-  print*, 'Stopping in gipl_bmi.f90'
-  stop
-  !print*, 'JUST DO IT...Assigning zdepth...'
-  !  zdepth = array_values
-  !if (array_name .eq. 'zdepth') then
-  !  print*, 'Assigning zdepth...'
-  !  zdepth = array_values
-  !else
-  !  print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
-  !    array_name
-  !  zdepth = 0
-  !endif
+  if (array_name .eq. 'zdepth') then
+    print*, 'Assigning zdepth...'
+    zdepth = array_values
+  else
+    print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+      array_name
+    zdepth = 0
+  endif
 
 end subroutine

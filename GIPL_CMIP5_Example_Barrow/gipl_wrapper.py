@@ -153,46 +153,37 @@ def set_gipl_array(array_name, array_values):
         assert array_values.ndim == 1
         n_levels = f2py_gipl.get_int_val('n_grd')
         assert array_values.size == n_levels
-        print('zdepth has {} values'.format(n_levels))
-        #f2py_gipl.set_array1d('zdepth', n_levels, array_values)
-        #f2py_gipl.set_array1d(n_levels, 'zdepth', array_values)
-        #f2py_gipl.set_array1d(n_levels, array_values, 'zdepth')
-        #f2py_gipl.set_array1d(n_levels, array_values)#, 'zdepth')
-        #f2py_gipl.set_array1d(n_levels)#, array_values)#, 'zdepth')
-        f2py_gipl.set_array1d(array_values, 123.45)#, n_levels)#, array_values)#, 'zdepth')
+        f2py_gipl.set_array1d(array_name, array_values)
     else:
         print('in set_gipl_array(), array_name not recognized: {}'.format(
             array_name))
         raise ValueError('unrecognized array_name in get_gipl_array()')
 
 
-if __name__ == '__main__':
-    list_so_routines(f2py_gipl)
-
-    # Initialize the GIPL model in the Fortran code
-    initialize_f2py_gipl()
-
+def array1d_assignment_example():
+    # Show an example of using get_gipl_array() and set_gipl_array()
     depth_array = get_gipl_array('zdepth')
     print('depth_array as originally set:')
-    print(depth_array[:10])
-    print('depth_array flags:')
-    print(depth_array.flags)
+    print(depth_array)
     print('\n')
 
 
     new_depth_array = np.subtract(depth_array, 1.0)
     print('depth_array as modified in python:')
     print('new_depth_array:')
-    print(new_depth_array[:10])
-    print('new_depth_array.flags:')
-    print(new_depth_array.flags)
+    print(new_depth_array)
     print('\n')
 
     set_gipl_array('zdepth', new_depth_array)
 
     depth_array = get_gipl_array('zdepth')
     print('depth_array retrieved from fortran after editing:')
-    print(depth_array[:10])
+    print(depth_array)
+
+
+if __name__ == '__main__':
+    # Initialize the GIPL model in the Fortran code
+    initialize_f2py_gipl()
 
     # Get the time parameters from the Fortran code
     python_time_loop = f2py_gipl.get_float_val('time_loop')
