@@ -1,11 +1,11 @@
 #!/bin/bash
 echo "removing files in output directory..."
-echo "rm dump/start.txt"
-rm dump/start.txt
-echo "rm dump/result.txt"
-rm dump/result.txt
-echo "rm dump/mean.txt"
-rm dump/mean.txt
+echo "rm output/start.txt"
+rm output/start.txt
+echo "rm output/result.txt"
+rm output/result.txt
+echo "rm output/mean.txt"
+rm output/mean.txt
 
 echo ". ./compile_f2p"
 . ./compile_f2p

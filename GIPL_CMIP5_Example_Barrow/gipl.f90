@@ -619,7 +619,7 @@ subroutine init_cond(q,last)
       call interpolate(zdepth_ini,ztemp_ini(:,I),n_ini,zdepth,temp(I,:),n_grd)
     enddo
   elseif(restart.EQ.0)then              !restart=0 enbales spinup
-    write(file_init,'(A14)') 'dump/start.txt'
+    write(file_init,'(A14)') 'output/start.txt'
     open(60,file=file_init,action='READ')
     read(60,*)time_restart              ! day number in restart file
     do J=1,n_grd
