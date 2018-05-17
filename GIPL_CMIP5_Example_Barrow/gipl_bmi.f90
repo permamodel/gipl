@@ -329,9 +329,57 @@ subroutine set_int_array1d_element(array_name, array_index, array_val)
   if (array_name .eq. 'zdepth_id') then
     zdepth_id(array_index) = array_val
   else
-    print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+    print*,'Fortran BMI error: set_int_array1d_element array_name not recognized: ',&
       array_name
     stop
   endif
 
 end subroutine set_int_array1d_element
+
+subroutine get_float_array1d_element(array_name, array_index, array_val)
+  use gipl_bmi
+  use grd
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: array_index
+  real*8 :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: array_index
+!f2py intent(out) :: array_val
+
+  if (array_name .eq. 'zdepth') then
+    array_val = zdepth(array_index)
+  else
+    print*,'Fortran BMI error: get_float_array1d_element name not recognized: ', array_name
+    stop
+  endif
+
+end subroutine get_float_array1d_element
+
+
+subroutine set_float_array1d_element(array_name, array_index, array_val)
+  use gipl_bmi
+  use grd
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: array_index
+  real*8 :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: array_index
+!f2py intent(in) :: array_val
+
+  if (array_name .eq. 'zdepth') then
+    zdepth(array_index) = array_val
+  else
+    print*,'Fortran BMI error: set_float_array1d_element array_name not recognized: ',&
+      array_name
+    stop
+  endif
+
+end subroutine set_float_array1d_element

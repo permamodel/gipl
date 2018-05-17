@@ -280,6 +280,25 @@ def example_get_set_int_array_value():
         sample_level, depth_index))
 
 
+def example_get_set_float_array_value():
+    # Example of extracting a single value from an array, 1D version
+    # Get the time parameters from the Fortran code
+    # Example of accessing single element of a 1D array
+    sample_level = 5
+    depth_index = f2py_gipl.get_float_array1d_element('zdepth', sample_level)
+    print('depth id of sample level {} is: {}'.format(sample_level,
+                                                      depth_index))
+
+    new_depth_index = depth_index + 1
+    print('Will set depth index to {}'.format(new_depth_index))
+    f2py_gipl.set_float_array1d_element(
+        'zdepth', sample_level, new_depth_index)
+
+    depth_index = f2py_gipl.get_float_array1d_element('zdepth', sample_level)
+    print('after resetting, current depth id of sample level {} is: {}'.format(
+        sample_level, depth_index))
+
+
 if __name__ == '__main__':
     # Initialize the GIPL model in the Fortran code
     initialize_f2py_gipl()
