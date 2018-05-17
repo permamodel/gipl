@@ -194,7 +194,7 @@ def set_gipl_array(array_name, array_values):
         raise ValueError('unrecognized array_name in set_gipl_array()')
 
 
-def array1d_assignment_example():
+def example_get_set_float_array1d():
     # Show an example of using get_gipl_array() and set_gipl_array()
     # with 1D arrays
     depth_array = get_gipl_array('zdepth')
@@ -216,7 +216,7 @@ def array1d_assignment_example():
     print(depth_array)
 
 
-def array2d_assignment_example():
+def example_get_set_float_array2d():
     # Show an example of using get_gipl_array() and set_gipl_array()
     # with 2D arrays
     temp_array = get_gipl_array('temp')
@@ -237,7 +237,7 @@ def array2d_assignment_example():
     print(temp_array)
 
 
-def array2d_of_yearly_interpolated_values():
+def example2_get_set_float_array2d():
     # Example of setting surface temperature
     # which should be done just before an update_model() call
     surf_temp_thisyear = get_gipl_array('utemp_i')
@@ -262,8 +262,6 @@ def array2d_of_yearly_interpolated_values():
 
 
 def example_get_set_int_array1d_value():
-    # Example of extracting a single value from an array, 1D version
-    # Get the time parameters from the Fortran code
     # Example of accessing single element of a 1D array
     sample_level = 5
     depth_index = f2py_gipl.get_int_array1d_element('zdepth_id', sample_level)
@@ -281,8 +279,6 @@ def example_get_set_int_array1d_value():
 
 
 def example_get_set_float_array1d_value():
-    # Example of extracting a single value from an array, 1D version
-    # Get the time parameters from the Fortran code
     # Example of accessing single element of a 1D array
     sample_level = 5
     depth_index = f2py_gipl.get_float_array1d_element('zdepth', sample_level)
@@ -297,6 +293,32 @@ def example_get_set_float_array1d_value():
     depth_index = f2py_gipl.get_float_array1d_element('zdepth', sample_level)
     print('after resetting, current depth id of sample level {} is: {}'.format(
         sample_level, depth_index))
+
+
+def example_get_set_float_array2d_value():
+    # Example of accessing single element of a 2D array
+
+    # The following example works when placed just before the time_loop
+    # increment in the main python_time_loop
+    #   example_get_set_float_array2d_value()
+
+    sample_i = 1
+    sample_j = 3
+    depth_index = f2py_gipl.get_float_array2d_element(
+        'res', sample_i, sample_j)
+    print('snow level in res of sample level ({}, {}) is: {}'.format(
+        sample_i, sample_j, depth_index))
+
+    new_depth_index = depth_index + 1
+    print('Will set snow level to {}'.format(new_depth_index))
+    f2py_gipl.set_float_array2d_element(
+        'res', sample_i, sample_j, new_depth_index)
+
+    depth_index = f2py_gipl.get_float_array2d_element(
+        'res', sample_i, sample_j)
+    print('after resetting,')
+    print('  current snow level of res at sample level ({}, {}) is: {}'
+          .format(sample_i, sample_j, depth_index))
 
 
 if __name__ == '__main__':
