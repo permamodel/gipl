@@ -1,4 +1,0 @@
-# mrc: make, run, compare
-make clean
-make
-./gipl

@@ -1,8 +1,0 @@
-# mrc: make, run, compare
-make clean
-rm output/start.txt
-rm output/mean.txt
-rm output/result.txt
-make
-./gipl gipl_config.cfg
-. ./check_noopt
