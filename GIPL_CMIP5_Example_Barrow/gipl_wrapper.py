@@ -134,16 +134,27 @@ def get_gipl_array(array_name):
     if array_name == 'zdepth':
         # zdepth is a 1-D array in depth
         n_levels = f2py_gipl.get_int_val('n_grd')
-        print('n_levels of zdepth grid: {}'.format(n_levels))
         returned_array = f2py_gipl.get_array1d('zdepth', n_levels)
-        #returned_array = f2py_gipl.get_array1d('zdepth')
     elif array_name == 'temp':
         # temp is a 2-D array in depth
         xdim = f2py_gipl.get_int_val('n_site')
         ydim = f2py_gipl.get_int_val('n_grd')
-        print('xdim = n_site = {}'.format(xdim))
-        print('ydim = n_grd = {}'.format(ydim))
         returned_array = f2py_gipl.get_array2d('temp', xdim, ydim)
+    elif array_name == 'utemp_i':
+        # temp is a 2-D array in depth
+        xdim = f2py_gipl.get_int_val('n_time') + 2
+        ydim = f2py_gipl.get_int_val('n_site')
+        returned_array = f2py_gipl.get_array2d('utemp_i', xdim, ydim)
+    elif array_name == 'snd_i':
+        # temp is a 2-D array in depth
+        xdim = f2py_gipl.get_int_val('n_time') + 2
+        ydim = f2py_gipl.get_int_val('n_site')
+        returned_array = f2py_gipl.get_array2d('snd_i', xdim, ydim)
+    elif array_name == 'stcon_i':
+        # temp is a 2-D array in depth
+        xdim = f2py_gipl.get_int_val('n_time') + 2
+        ydim = f2py_gipl.get_int_val('n_site')
+        returned_array = f2py_gipl.get_array2d('stcon_i', xdim, ydim)
     else:
         print('in get_float_val(), array_name not recognized: {}'.format(
             array_name))
@@ -161,8 +172,20 @@ def set_gipl_array(array_name, array_values):
         n_levels = f2py_gipl.get_int_val('n_grd')
         assert array_values.size == n_levels
         f2py_gipl.set_array1d(array_name, array_values)
-    if array_name == 'temp':
+    elif array_name == 'temp':
         # temp is a 2-D array in location, value
+        assert array_values.ndim == 2
+        f2py_gipl.set_array2d(array_name, array_values)
+    elif array_name == 'utemp_i':
+        # utemp_i is a 2-D array in time, value
+        assert array_values.ndim == 2
+        f2py_gipl.set_array2d(array_name, array_values)
+    elif array_name == 'snd_i':
+        # snd_i is a 2-D array in time, value
+        assert array_values.ndim == 2
+        f2py_gipl.set_array2d(array_name, array_values)
+    elif array_name == 'stcon_i':
+        # stcon_i is a 2-D array in time, value
         assert array_values.ndim == 2
         f2py_gipl.set_array2d(array_name, array_values)
     else:
@@ -212,6 +235,30 @@ def array2d_assignment_example():
     temp_array = get_gipl_array('temp')
     print('temp_array retrieved from fortran after editing:')
     print(temp_array)
+
+
+def array2d_of_yearly_interpolated_values():
+    # Example of setting surface temperature
+    # which should be done just before an update_model() call
+    surf_temp_thisyear = get_gipl_array('utemp_i')
+    print('surf_temp_thisyear as originally set:')
+    print(surf_temp_thisyear)
+    print('\n')
+
+    new_surf_temp_thisyear = np.subtract(surf_temp_thisyear, 1.0)
+    print('new_surf_temp_thisyear as modified in python:')
+    print('new_surf_temp_thisyear:')
+    print(new_surf_temp_thisyear)
+    print('\n')
+
+    set_gipl_array('utemp_i', new_surf_temp_thisyear)
+
+    surf_temp_thisyear = get_gipl_array('utemp_i')
+    print('surf_temp_thisyear retrieved from fortran after editing:')
+    print(surf_temp_thisyear)
+
+    #print('Stopping utemp_i example')
+    #exit(0)
 
 
 if __name__ == '__main__':

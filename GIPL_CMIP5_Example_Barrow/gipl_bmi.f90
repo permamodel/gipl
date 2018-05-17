@@ -219,6 +219,7 @@ subroutine get_array2d(array_name, xdim, ydim, return_array)
   use gipl_bmi
   use grd
   use thermo  ! provides temp
+  use bnd     ! provides utemp_i, snd_i, stcon_i
 
   implicit none
 
@@ -231,9 +232,13 @@ subroutine get_array2d(array_name, xdim, ydim, return_array)
 !f2py intent(out) :: return_array
 
   if (array_name .eq. 'temp') then
-    print*, 'in get_array2d, temp is:'
-    print*, temp
     return_array = temp
+  elseif (array_name .eq. 'utemp_i') then
+    return_array = utemp_i
+  elseif (array_name .eq. 'snd_i') then
+    return_array = snd_i
+  elseif (array_name .eq. 'stcon_i') then
+    return_array = stcon_i
   else
     print*,'Fortran BMI error: get_array2d name not recognized: ', array_name
     return_array = 0
@@ -246,6 +251,7 @@ subroutine set_array2d(array_name, array_values, xdim, ydim)
   use gipl_bmi
   use grd
   use thermo  ! provides temp
+  use bnd     ! provides utemp_i, snd_i, stcon_i
 
   implicit none
 
@@ -258,10 +264,13 @@ subroutine set_array2d(array_name, array_values, xdim, ydim)
 !f2py intent(in, hide) :: xdim, ydim
 
   if (array_name .eq. 'temp') then
-    print*, 'Assigning temp...'
-    print*, 'xdim: ', xdim
-    print*, 'ydim: ', ydim
     temp = array_values
+  elseif (array_name .eq. 'utemp_i') then
+    utemp_i = array_values
+  elseif (array_name .eq. 'snd_i') then
+    snd_i = array_values
+  elseif (array_name .eq. 'stcon_i') then
+    stcon_i = array_values
   else
     print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
       array_name
@@ -269,4 +278,3 @@ subroutine set_array2d(array_name, array_values, xdim, ydim)
   endif
 
 end subroutine
-
