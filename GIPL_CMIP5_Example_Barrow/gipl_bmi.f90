@@ -173,7 +173,7 @@ subroutine set_string_val(var_name, var_val)
 end subroutine set_string_val
 
 
-subroutine get_array1d(array_name, array_dim, return_array)
+subroutine get_float_array1d(array_name, array_dim, return_array)
   use gipl_bmi
   use grd
 
@@ -190,14 +190,14 @@ subroutine get_array1d(array_name, array_dim, return_array)
   if (array_name .eq. 'zdepth') then
     return_array = zdepth
   else
-    print*,'Fortran BMI error: get_array1d name not recognized: ', array_name
+    print*,'Fortran BMI error: get_float_array1d name not recognized: ', array_name
     stop
   endif
 
-end subroutine get_array1d
+end subroutine get_float_array1d
 
 
-subroutine set_array1d(array_name, array_values, array_dim)
+subroutine set_float_array1d(array_name, array_values, array_dim)
   use gipl_bmi
   use grd
 
@@ -215,15 +215,15 @@ subroutine set_array1d(array_name, array_values, array_dim)
     print*, 'Assigning zdepth...'
     zdepth = array_values
   else
-    print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+    print*,'Fortran BMI error: set_float_array1d array_name not recognized: ',&
       array_name
     stop
   endif
 
-end subroutine set_array1d
+end subroutine set_float_array1d
 
 
-subroutine get_array2d(array_name, xdim, ydim, return_array)
+subroutine get_float_array2d(array_name, xdim, ydim, return_array)
   use gipl_bmi
   use grd
   use thermo  ! provides temp
@@ -248,14 +248,14 @@ subroutine get_array2d(array_name, xdim, ydim, return_array)
   elseif (array_name .eq. 'stcon_i') then
     return_array = stcon_i
   else
-    print*,'Fortran BMI error: get_array2d name not recognized: ', array_name
+    print*,'Fortran BMI error: get_float_array2d name not recognized: ', array_name
     stop
   endif
 
-end subroutine
+end subroutine get_float_array2d
 
 
-subroutine set_array2d(array_name, array_values, xdim, ydim)
+subroutine set_float_array2d(array_name, array_values, xdim, ydim)
   use gipl_bmi
   use grd
   use thermo  ! provides temp
@@ -280,12 +280,12 @@ subroutine set_array2d(array_name, array_values, xdim, ydim)
   elseif (array_name .eq. 'stcon_i') then
     stcon_i = array_values
   else
-    print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+    print*,'Fortran BMI error: set_float_array1d array_name not recognized: ',&
       array_name
     stop
   endif
 
-end subroutine set_array2d
+end subroutine set_float_array2d
 
 
 subroutine get_int_array1d_element(array_name, array_index, array_val)
@@ -383,3 +383,117 @@ subroutine set_float_array1d_element(array_name, array_index, array_val)
   endif
 
 end subroutine set_float_array1d_element
+
+subroutine get_int_array2d_element(array_name, x_index, y_index, array_val)
+  use gipl_bmi
+  use grd
+  use alt  ! provides n_frz_frn
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: x_index, y_index
+  integer :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: x_index, y_index
+!f2py intent(out) :: array_val
+
+  if (array_name .eq. 'n_frz_frn') then
+    array_val = n_frz_frn(x_index, y_index)
+  else
+    print*,'Fortran BMI error: get_int_array2d_element name not recognized: ', array_name
+    stop
+  endif
+
+end subroutine get_int_array2d_element
+
+
+subroutine set_int_array2d_element(array_name, x_index, y_index, array_val)
+  use gipl_bmi
+  use grd
+  use alt  ! provides n_frz_frn
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: x_index, y_index
+  integer :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: x_index, y_index
+!f2py intent(in) :: array_val
+
+  if (array_name .eq. 'n_frz_frn') then
+    n_frz_frn(x_index, y_index) = array_val
+  else
+    print*,'Fortran BMI error: set_int_array2d_element array_name not recognized: ',&
+      array_name
+    stop
+  endif
+
+end subroutine set_int_array2d_element
+
+subroutine get_float_array2d_element(array_name, x_index, y_index, array_val)
+  use gipl_bmi
+  use grd
+  use thermo  ! provides temp
+  use bnd     ! provides utemp_i, snd_i, stcon_i
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: x_index, y_index
+  real*8 :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: x_index, y_index
+!f2py intent(out) :: array_val
+
+  if (array_name .eq. 'temp') then
+    array_val = temp(x_index, y_index)
+  elseif (array_name .eq. 'utemp_i') then
+    array_val = utemp_i(x_index, y_index)
+  elseif (array_name .eq. 'snd_i') then
+    array_val = snd_i(x_index, y_index)
+  elseif (array_name .eq. 'stcon_i') then
+    array_val = stcon_i(x_index, y_index)
+  else
+    print*,'Fortran BMI error: get_float_array2d_element name not recognized: ', array_name
+    stop
+  endif
+
+end subroutine get_float_array2d_element
+
+
+subroutine set_float_array2d_element(array_name, x_index, y_index, array_val)
+  use gipl_bmi
+  use grd
+  use thermo  ! provides temp
+  use bnd     ! provides utemp_i, snd_i, stcon_i
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: x_index, y_index
+  real*8 :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: x_index, y_index
+!f2py intent(in) :: array_val
+
+  if (array_name .eq. 'temp') then
+    temp(x_index, y_index) = array_val
+  elseif (array_name .eq. 'utemp_i') then
+    utemp_i(x_index, y_index) = array_val
+  elseif (array_name .eq. 'snd_i') then
+    snd_i(x_index, y_index) = array_val
+  elseif (array_name .eq. 'stcon_i') then
+    stcon_i(x_index, y_index) = array_val
+  else
+    print*,'Fortran BMI error: set_float_array2d_element array_name not recognized: ',&
+      array_name
+    stop
+  endif
+
+end subroutine set_float_array2d_element

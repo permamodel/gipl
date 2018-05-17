@@ -134,27 +134,27 @@ def get_gipl_array(array_name):
     if array_name == 'zdepth':
         # zdepth is a 1-D array in depth
         n_levels = f2py_gipl.get_int_val('n_grd')
-        returned_array = f2py_gipl.get_array1d('zdepth', n_levels)
+        returned_array = f2py_gipl.get_float_array1d('zdepth', n_levels)
     elif array_name == 'temp':
         # temp is a 2-D array in depth
         xdim = f2py_gipl.get_int_val('n_site')
         ydim = f2py_gipl.get_int_val('n_grd')
-        returned_array = f2py_gipl.get_array2d('temp', xdim, ydim)
+        returned_array = f2py_gipl.get_float_array2d('temp', xdim, ydim)
     elif array_name == 'utemp_i':
         # temp is a 2-D array in depth
         xdim = f2py_gipl.get_int_val('n_time') + 2
         ydim = f2py_gipl.get_int_val('n_site')
-        returned_array = f2py_gipl.get_array2d('utemp_i', xdim, ydim)
+        returned_array = f2py_gipl.get_float_array2d('utemp_i', xdim, ydim)
     elif array_name == 'snd_i':
         # temp is a 2-D array in depth
         xdim = f2py_gipl.get_int_val('n_time') + 2
         ydim = f2py_gipl.get_int_val('n_site')
-        returned_array = f2py_gipl.get_array2d('snd_i', xdim, ydim)
+        returned_array = f2py_gipl.get_float_array2d('snd_i', xdim, ydim)
     elif array_name == 'stcon_i':
         # temp is a 2-D array in depth
         xdim = f2py_gipl.get_int_val('n_time') + 2
         ydim = f2py_gipl.get_int_val('n_site')
-        returned_array = f2py_gipl.get_array2d('stcon_i', xdim, ydim)
+        returned_array = f2py_gipl.get_float_array2d('stcon_i', xdim, ydim)
     else:
         print('in get_float_val(), array_name not recognized: {}'.format(
             array_name))
@@ -171,23 +171,23 @@ def set_gipl_array(array_name, array_values):
         assert array_values.ndim == 1
         n_levels = f2py_gipl.get_int_val('n_grd')
         assert array_values.size == n_levels
-        f2py_gipl.set_array1d(array_name, array_values)
+        f2py_gipl.set_float_array1d(array_name, array_values)
     elif array_name == 'temp':
         # temp is a 2-D array in location, value
         assert array_values.ndim == 2
-        f2py_gipl.set_array2d(array_name, array_values)
+        f2py_gipl.set_float_array2d(array_name, array_values)
     elif array_name == 'utemp_i':
         # utemp_i is a 2-D array in time, value
         assert array_values.ndim == 2
-        f2py_gipl.set_array2d(array_name, array_values)
+        f2py_gipl.set_float_array2d(array_name, array_values)
     elif array_name == 'snd_i':
         # snd_i is a 2-D array in time, value
         assert array_values.ndim == 2
-        f2py_gipl.set_array2d(array_name, array_values)
+        f2py_gipl.set_float_array2d(array_name, array_values)
     elif array_name == 'stcon_i':
         # stcon_i is a 2-D array in time, value
         assert array_values.ndim == 2
-        f2py_gipl.set_array2d(array_name, array_values)
+        f2py_gipl.set_float_array2d(array_name, array_values)
     else:
         print('in set_gipl_array(), array_name not recognized: {}'.format(
             array_name))
@@ -261,7 +261,7 @@ def array2d_of_yearly_interpolated_values():
     #exit(0)
 
 
-def example_get_set_int_array_value():
+def example_get_set_int_array1d_value():
     # Example of extracting a single value from an array, 1D version
     # Get the time parameters from the Fortran code
     # Example of accessing single element of a 1D array
@@ -280,7 +280,7 @@ def example_get_set_int_array_value():
         sample_level, depth_index))
 
 
-def example_get_set_float_array_value():
+def example_get_set_float_array1d_value():
     # Example of extracting a single value from an array, 1D version
     # Get the time parameters from the Fortran code
     # Example of accessing single element of a 1D array
