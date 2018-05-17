@@ -51,9 +51,10 @@ subroutine get_float_val(var_name, var_val)
     var_val = time_e
   else
     print*,'Fortran BMI error: get_float_var not recognized: ', var_name
+    stop
   endif
 
-end subroutine
+end subroutine get_float_val
 
 
 subroutine set_float_val(var_name, var_val)
@@ -75,9 +76,10 @@ subroutine set_float_val(var_name, var_val)
     time_e = var_val
   else
     print*,'Fortran BMI error: set_float_var not recognized: ', var_name
+    stop
   endif
 
-end subroutine
+end subroutine set_float_val
 
 
 subroutine get_int_val(var_name, var_val)
@@ -96,13 +98,16 @@ subroutine get_int_val(var_name, var_val)
     var_val = n_time
   elseif (var_name .eq. 'n_grd') then
     var_val = n_grd
+  elseif (var_name .eq. 'm_grd') then
+    var_val = m_grd
   elseif (var_name .eq. 'n_site') then
     var_val = n_site
   else
     print*,'Fortran BMI error: get_int_var not recognized: ', var_name
+    stop
   endif
 
-end subroutine
+end subroutine get_int_val
 
 
 subroutine set_int_val(var_name, var_val)
@@ -120,9 +125,10 @@ subroutine set_int_val(var_name, var_val)
     n_time = var_val
   else
     print*,'Fortran BMI error: set_int_var not recognized: ', var_name
+    stop
   endif
 
-end subroutine
+end subroutine set_int_val
 
 
 subroutine get_string_val(var_name, var_val)
@@ -140,9 +146,10 @@ subroutine get_string_val(var_name, var_val)
     var_val = fconfig
   else
     print*,'Fortran BMI error: get_string_var not recognized: ', var_name
+    stop
   endif
 
-end subroutine
+end subroutine get_string_val
 
 
 subroutine set_string_val(var_name, var_val)
@@ -160,9 +167,10 @@ subroutine set_string_val(var_name, var_val)
     fconfig = var_val
   else
     print*,'Fortran BMI error: set_string_var not recognized: ', var_name
+    stop
   endif
 
-end subroutine
+end subroutine set_string_val
 
 
 subroutine get_array1d(array_name, array_dim, return_array)
@@ -183,10 +191,10 @@ subroutine get_array1d(array_name, array_dim, return_array)
     return_array = zdepth
   else
     print*,'Fortran BMI error: get_array1d name not recognized: ', array_name
-    return_array = 0
+    stop
   endif
 
-end subroutine
+end subroutine get_array1d
 
 
 subroutine set_array1d(array_name, array_values, array_dim)
@@ -212,7 +220,7 @@ subroutine set_array1d(array_name, array_values, array_dim)
     stop
   endif
 
-end subroutine
+end subroutine set_array1d
 
 
 subroutine get_array2d(array_name, xdim, ydim, return_array)
@@ -241,7 +249,7 @@ subroutine get_array2d(array_name, xdim, ydim, return_array)
     return_array = stcon_i
   else
     print*,'Fortran BMI error: get_array2d name not recognized: ', array_name
-    return_array = 0
+    stop
   endif
 
 end subroutine
@@ -277,4 +285,53 @@ subroutine set_array2d(array_name, array_values, xdim, ydim)
     stop
   endif
 
-end subroutine
+end subroutine set_array2d
+
+
+subroutine get_int_array1d_element(array_name, array_index, array_val)
+  use gipl_bmi
+  use grd
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: array_index
+  integer :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: array_index
+!f2py intent(out) :: array_val
+
+  if (array_name .eq. 'zdepth_id') then
+    array_val = zdepth_id(array_index)
+  else
+    print*,'Fortran BMI error: get_int_array1d_element name not recognized: ', array_name
+    stop
+  endif
+
+end subroutine get_int_array1d_element
+
+
+subroutine set_int_array1d_element(array_name, array_index, array_val)
+  use gipl_bmi
+  use grd
+
+  implicit none
+
+  character(64) :: array_name
+  integer :: array_index
+  integer :: array_val
+
+!f2py intent(in) :: array_name
+!f2py intent(in) :: array_index
+!f2py intent(in) :: array_val
+
+  if (array_name .eq. 'zdepth_id') then
+    zdepth_id(array_index) = array_val
+  else
+    print*,'Fortran BMI error: set_array1d array_name not recognized: ',&
+      array_name
+    stop
+  endif
+
+end subroutine set_int_array1d_element
