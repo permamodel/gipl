@@ -1,0 +1,41 @@
+-----------------------------------------------
+
+Scalars
+
+Typ   Name
+---   ------
+int   n_time
+int   n_site
+int   n_grd
+int   m_grd
+
+flt   time_step
+flt   time_loop
+flt   time_beg
+flt   time_end
+flt   time_s
+flt   time_e
+
+
+
+-----------------------------------------------
+
+Arrays:
+
+Typ   Name        xD   Dim(s)
+---   ------      --   -------------------
+int   zdepth_id   1D  m_grd
+
+int   n_frz_frn   2D  n_time, n_site
+
+
+flt   zdepth      1D   n_grd
+
+flt   temp        2D   n_site, n_grd
+flt   utemp_i     2D   n_time+2, n_site
+flt   snd_i       2D   n_time+2, n_site
+flt   stcon_i     2D   n_time+2, n_site
+flt   res         2D   n_time, m_grd+3
+
+
+-----------------------------------------------
