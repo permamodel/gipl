@@ -7,8 +7,8 @@ rm output/result.txt
 echo "rm output/mean.txt"
 rm output/mean.txt
 
-echo ". ./compile_f2p"
-. ./compile_f2p
+echo "./compile_f2p.sh"
+./compile_f2p.sh
 
 echo "python gipl_wrapper.py"
 python gipl_wrapper.py $1
