@@ -23,8 +23,10 @@ f2py_gipl.so: gipl_bmi.f90 gipl.f90 gipl_mods.f90 gipl_bmi_mod.f90
 	f2py -m f2py_gipl gipl_bmi.f90 gipl.f90 gipl_mods.f90 gipl_bmi_mod.f90 -c > f2py_gipl_and_mods.out 2>&1
 
 clean:
-	rm *.o *.so *.mod
+	rm *.o *.so *.mod f2py_gipl_and_mods.out gipl 
 
-clean_all:
-	rm *.so *.o *.mod f2py_gipl_and_mods.out gipl
+clean_fortran:
+	rm *.o *.mod gipl 
 
+clean_python:
+	rm f2py_gipl_and_mods.out *.so
