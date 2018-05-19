@@ -1,0 +1,6 @@
+echo "diff output/mean.txt original_output/mean.txt"
+diff output/mean.txt original_output/mean.txt
+echo "diff output/result.txt original_output/result.txt"
+diff output/result.txt original_output/result.txt
+echo "diff output/start.txt original_output/start.txt"
+diff output/start.txt original_output/start.txt
