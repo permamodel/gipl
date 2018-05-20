@@ -204,6 +204,14 @@ subroutine write_output()
       enddo
     enddo
 
+    ! Do the same averaging that res_save did
+    do i_site=1,n_site
+      annual_snow_level(i_site)=sum((RES(:,i_grd)))
+      do i_grd=1,m_grd+3
+        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+      enddo
+    enddo
+
     do i_site=1,n_site
       frz_up_time_cur=-7777.D0
       frz_up_time_tot=frz_up_time_cur
@@ -581,6 +589,17 @@ subroutine initialize(named_config_file)
     call active_layer(i_site)
   enddo
 
+  ! Allocate output arrays
+  allocate(monthly_freeze_up_temp(n_site, n_time))
+  allocate(monthly_snow_level(n_site, n_time))
+  allocate(monthly_temperature(n_site, n_time, m_grd))
+  allocate(annual_freeze_up_temp(n_site))
+  allocate(annual_snow_level(n_site))
+  allocate(annual_temperature(n_site, m_grd))
+  allocate(freeze_up_depth(n_site))
+  allocate(freeze_up_time_current(n_site))
+  allocate(freeze_up_time_total(n_site))
+
   open(1,file=result_file,STATUS='unknown')
   open(2,file=aver_res_file,STATUS='unknown')
   open(3,file=restart_file,STATUS='unknown')
@@ -683,13 +702,21 @@ subroutine save_results(k, time2, restart_time)
   real*8 :: time2
   real*8 :: futemp,fsnow_level
 
-  RES(i_time(k),1)=time2 + restart_time
-  RES(i_time(k),2)=futemp(time2,k)
-  RES(i_time(k),3)=fsnow_level(k,time2)
-  do  J=1,m_grd
-    RES(i_time(k),J+3)=temp(k,zdepth_id(J))
+  ! Save these values to an array instead of a file
+  monthly_freeze_up_temp(k, i_time(k)) = futemp(time2, k)
+  monthly_snow_level(k, i_time(k)) = fsnow_level(k, time2)
+  do j=1,m_grd
+    monthly_temperature(k, i_time(k), j) = temp(k, zdepth_id(j))
   enddo
 
+  ! The following is the original code for writing these results each timestep
+  RES(i_time(k),1)=time2 + restart_time
+  RES(i_time(k),2)=monthly_freeze_up_temp(k, i_time(k))
+  RES(i_time(k),3)=monthly_snow_level(k, i_time(k))
+  do  J=1,m_grd
+    RES(i_time(k),J+3)=monthly_temperature(k, i_time(k), j)
+  enddo
+  
 end subroutine save_results
 
 !________________________________________________
