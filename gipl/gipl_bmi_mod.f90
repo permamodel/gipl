@@ -6,7 +6,12 @@ module gipl_bmi
   real*8, save :: time_loop
   real*8, save :: time_step
   real*8, save :: time_beg,time_end
-  real*8, save :: time_s, time_e
+  real*8 :: time_s, time_e
+
+  !! Test arrays to see how f2py passes arrays to python/numpy
+  integer, allocatable, dimension(:, :, :), save :: intarray3d
+  real*8, allocatable, dimension(:, :, :), save :: doublearray3d
+
 
   ! Input arrays
 
