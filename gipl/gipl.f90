@@ -15,15 +15,6 @@ program gipl2
   implicit none
 
   character(64) :: empty_filename = ''
-  !character(64) :: arg1
-
-  !write(6,'(3(a))'), 'fconfig before calling:***',fconfig,'***'
-  !if (fconfig .eq. '') print*, 'empty fconfig'
-  !call getarg(1, arg1)
-  !arg1 = trim(arg1)
-  !print*,'len arg1: ', len(arg1)
-  !print*,'arg1: ', arg1
-  !print*,'iargc:', iargc()
 
   if (iargc() .eq. 1) then
     call getarg(1, fconfig)
@@ -120,8 +111,8 @@ subroutine update_model()
   integer :: i_site,j_time
 
   do i_site=1,n_site
-    call stefan1D(temp(i_site,:),n_grd,dz,i_site,lay_id(i_site,:), &
-      temp_grd(i_site))
+    call stefan1D(temp(i_site,:),dz,i_site,lay_id(i_site,:), &
+      temp_grd(i_site), n_grd)
   enddo
 
   time_loop=time_loop+time_step
@@ -136,7 +127,6 @@ subroutine update_model()
     call active_layer(i_site)
   enddo
 
-  !if (mod(int(time_loop), n_time) .ne. 0) then
   if (mod(int(time_loop), n_time) .eq. 0) then
     ! Perform year-end operations
     ! This section interpolates snd and stcon values to snd_i and stcon_i
@@ -179,7 +169,7 @@ subroutine write_output()
 
   integer :: i_site, j_time, i_grd
 
-  real*8 :: dfrz_frn(n_time)             ! depth of the freezing front
+  real*8 :: dfrz_frn(n_time)         ! depth of the freezing front
   real :: frz_up_time_cur            ! freezeup time current (within a year)
   real :: frz_up_time_tot            ! freezeup time global
 
@@ -251,18 +241,20 @@ subroutine write_output()
 
   ! Write to the restart file
   if (mod(int(time_loop), n_time) .eq. 0) then
-    call save_restart(n_site)
+    call save_restart()
   endif
 
 end subroutine write_output
 
 
-subroutine save_restart(n_site)
+!subroutine save_restart(n_site)
+subroutine save_restart()
+  use gipl_bmi
   use bnd
   use thermo
   use grd
+
   implicit none
-  integer n_site
 
   integer :: i_site,i_grd
 
@@ -454,22 +446,19 @@ subroutine initialize(named_config_file)
   enddo
   close(60)
 
-! note: that all max n_lay_cur layers has to be read
-! or it will a give segmantation error
-!      n_lay=10!MAXVAL(n_lay_cur)
-!----------------------------------------------------
   open (60, file=file_organic)
-  read(60,*) vln ! reads numbers of  classes
-  allocate(A1(n_lay,vln),STAT=IERR) ! vwc
-  allocate(A2(n_lay,vln),STAT=IERR) ! a_coef
-  allocate(A3(n_lay,vln),STAT=IERR) ! b_coef
-  allocate(A4(n_lay,vln),STAT=IERR) ! hcap_frz
-  allocate(A5(n_lay,vln),STAT=IERR)  !hcap_thw
-  allocate(A6(n_lay,vln),STAT=IERR)  !tcon_frz
-  allocate(A7(n_lay,vln),STAT=IERR)  !tcon_thw
-  allocate(A8(vln,n_lay),STAT=IERR)  !bot_cond
-  allocate(veg_class(vln),STAT=IERR) !veg_class
-  allocate(num_vl(vln),STAT=IERR)  !num_vl number of vegetation layers
+  ! reads numbers of  classes
+  read(60,*) vln
+  allocate(A1(n_lay,vln),STAT=IERR)  ! vwc
+  allocate(A2(n_lay,vln),STAT=IERR)  ! a_coef
+  allocate(A3(n_lay,vln),STAT=IERR)  ! b_coef
+  allocate(A4(n_lay,vln),STAT=IERR)  ! hcap_frz
+  allocate(A5(n_lay,vln),STAT=IERR)  ! hcap_thw
+  allocate(A6(n_lay,vln),STAT=IERR)  ! tcon_frz
+  allocate(A7(n_lay,vln),STAT=IERR)  ! tcon_thw
+  allocate(A8(vln,n_lay),STAT=IERR)  ! bot_cond
+  allocate(veg_class(vln),STAT=IERR) ! veg_class
+  allocate(num_vl(vln),STAT=IERR)    ! num_vl number of vegetation layers
   do I = 1,vln
     read(60,*)veg_class(i),num_vl(i)
     do j=1,num_vl(i)
@@ -480,17 +469,18 @@ subroutine initialize(named_config_file)
   close(60)
 
   open (60, file=file_mineral)
-  read(60,*) gln ! reads numbers of  classes
-  allocate(B1(n_lay,gln),STAT=IERR) ! vwc
-  allocate(B2(n_lay,gln),STAT=IERR) ! a_coef
-  allocate(B3(n_lay,gln),STAT=IERR) ! b_coef
-  allocate(B4(n_lay,gln),STAT=IERR) ! hcap_frz
-  allocate(B5(n_lay,gln),STAT=IERR)  !hcap_thw
-  allocate(B6(n_lay,gln),STAT=IERR)  !tcon_frz
-  allocate(B7(n_lay,gln),STAT=IERR)  !tcon_thw
-  allocate(B8(gln,n_lay),STAT=IERR)  !bot_cond
-  allocate(geo_class(gln),STAT=IERR) !geo_class
-  allocate(num_gl(gln),STAT=IERR)  !num_vl number of lithologic layers
+  ! reads numbers of  classes
+  read(60,*) gln
+  allocate(B1(n_lay,gln),STAT=IERR)  ! vwc
+  allocate(B2(n_lay,gln),STAT=IERR)  ! a_coef
+  allocate(B3(n_lay,gln),STAT=IERR)  ! b_coef
+  allocate(B4(n_lay,gln),STAT=IERR)  ! hcap_frz
+  allocate(B5(n_lay,gln),STAT=IERR)  ! hcap_thw
+  allocate(B6(n_lay,gln),STAT=IERR)  ! tcon_frz
+  allocate(B7(n_lay,gln),STAT=IERR)  ! tcon_thw
+  allocate(B8(gln,n_lay),STAT=IERR)  ! bot_cond
+  allocate(geo_class(gln),STAT=IERR) ! geo_class
+  allocate(num_gl(gln),STAT=IERR)    !num_vl number of lithologic layers
   do I = 1,gln
     read(60,*)geo_class(i),num_gl(i)
     do j=1,num_gl(i)
@@ -499,7 +489,6 @@ subroutine initialize(named_config_file)
     enddo
   enddo
   close(60)
-
 
   allocate(vwc(n_lay,n_site),STAT=IERR)
   allocate(a_coef(n_lay,n_site),STAT=IERR)
@@ -546,7 +535,7 @@ subroutine initialize(named_config_file)
       tcon_frz(J,I)=B7(k,geo_code(i));
       EE(J,I)=0
       layer_thick=layer_thick+B8(geo_code(i),k);
-      n_bnd_lay(i,j+1)=SNGL(layer_thick) !B8(geo_code(i),j)
+      n_bnd_lay(i,j+1)=SNGL(layer_thick)
       k=k+1
     enddo
     n_bnd_lay(i,n_lay_cur(I)+1)=SNGL(zdepth(n_grd))
@@ -633,7 +622,14 @@ subroutine initialize(named_config_file)
   time_loop=0.0D0
   TINIR=0.0D0
 
+  ! Allocate the 'input' arrays
+  n_total_timesteps = int((time_e - time_s) / time_step) + 1
+  allocate(surface_temp(n_total_timesteps))
+  allocate(snow_depth(n_total_timesteps))
+  allocate(snow_thermal_conductivity(n_total_timesteps))
+
 end subroutine initialize
+
 
 subroutine init_cond(q,last)
 
@@ -662,6 +658,7 @@ subroutine init_cond(q,last)
   endif
 
 end subroutine init_cond
+
 
 subroutine active_layer(k)
 
@@ -704,6 +701,7 @@ subroutine active_layer(k)
 
 end subroutine active_layer
 
+
 subroutine save_results(k, time2, restart_time)
   use gipl_bmi
   use thermo
@@ -726,6 +724,7 @@ subroutine save_results(k, time2, restart_time)
 
 end subroutine save_results
 
+
 !________________________________________________
 !__________________FUNCTIONS_____________________
 !________________________________________________
@@ -733,7 +732,7 @@ real*8 function funf_water(T,NNN,I)
   use gipl_bmi
   use thermo
   implicit none
-  real*8, intent(in) :: T ! temprature
+  real*8, intent(in) :: T ! temperature
   integer, intent(in) :: NNN, I
   real*8 :: temp_dep
   real*8 :: a,b,e
@@ -755,8 +754,10 @@ real*8 function funf_water(T,NNN,I)
   endif
   return
 end function funf_water
+
+
 !-----------------------------------------------
-real*8 function fsat_unf_water(T,NNN,I)!Saturated unforzen water
+real*8 function fsat_unf_water(T,NNN,I)!Saturated unfrozen water
   use gipl_bmi
   use thermo
 
@@ -767,7 +768,7 @@ real*8 function fsat_unf_water(T,NNN,I)!Saturated unforzen water
   real*8 :: a,b,e
   real*8 :: theta
 
-  temp_dep=temp_frz(NNN,I) ! freezing temprature depression
+  temp_dep=temp_frz(NNN,I) ! freezing temperature depression
   e=EE(NNN,I)
   theta=vwc(NNN,I)
   a=a_coef(NNN,I)
@@ -784,12 +785,14 @@ real*8 function fsat_unf_water(T,NNN,I)!Saturated unforzen water
   return
 
 end function fsat_unf_water
+
+
 !-----------------------------------------------
 real*8 function fdunf_water(T,NNN,I)
   use gipl_bmi
   use thermo
   implicit none
-  real*8, intent(in) :: T ! temprature
+  real*8, intent(in) :: T ! temperature
   integer, intent(in) :: NNN, I
   real*8 :: temp_dep
   real*8 :: a,b,e
@@ -812,6 +815,8 @@ real*8 function fdunf_water(T,NNN,I)
   return
 
 end function fdunf_water
+
+
 !----------------------------------------
 real*8 function futemp(T,I)
   use gipl_bmi
@@ -825,6 +830,8 @@ real*8 function futemp(T,I)
     *(utemp_i(II+1,I)-utemp_i(II,I))/(utemp_time_i(II+1)-utemp_time_i(II))
   return
 end function futemp
+
+
 !----------------------------------------
 subroutine snowfix(air_temp,stcon,n)
 
@@ -875,6 +882,7 @@ subroutine interpolate(XIN,YIN,NIN,XOUT,YOUT,n_itime)
   return
 end
 
+
 !----------------------------------------
 subroutine assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
   !assigns correspond layer id to the grid point
@@ -901,6 +909,8 @@ subroutine assign_layer_id(n_lay,n_lay_cur,n_site,n_grd,zdepth,n_bnd_lay,lay_id)
   enddo
   return
 end
+
+
 !----------------------------------------
 real*8 function fsnow_level(site_id,time)
   use gipl_bmi
@@ -914,6 +924,8 @@ real*8 function fsnow_level(site_id,time)
     -utemp_time_i(II))
   return
 end function fsnow_level
+
+
 !-----------------------------------------------
 real*8 function ftcon(T,id,j,time_cur)
 
@@ -955,6 +967,8 @@ real*8 function ftcon(T,id,j,time_cur)
   endif
   return
 end function ftcon
+
+
 !----------------------------------------
 real*8 function fhcap(T,NNUS,I)
   use gipl_bmi
@@ -972,7 +986,6 @@ real*8 function fhcap(T,NNUS,I)
   real*8 :: fdunf_water
   real*8 :: funf_water
 
-
   H=1/(T(1)-T(2))
   if(DABS(T(1)-T(2)).LT.1.D-6) THEN
     fhcap=0.5d0*(fdunf_water(T(1),NNUS(1),I)+fdunf_water(T(2),NNUS(2),I))
@@ -987,7 +1000,8 @@ real*8 function fhcap(T,NNUS,I)
   fhcap=L_fus*DABS(fhcap)
   return
 end function fhcap
-!----------------------------------------
+
+
 !----------------------------------------
 real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
   use gipl_bmi
@@ -1010,8 +1024,8 @@ real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
   real*8 :: funf_water
   real*8 :: fhcap
 
-  li=lay_id(I,J)                          ! layer index
-  gr_sur=sea_level                        ! ground surface
+  li=lay_id(I,J)                      ! layer index
+  gr_sur=sea_level                    ! ground surface
   if(zdepth(J).lE.gr_sur)then
     fapp_hcap=hcap_s                  ! heat capacity for snow
   else
@@ -1045,8 +1059,10 @@ real*8 function fapp_hcap(T,I,J,n_grd_passed)       ! Apparent heat capacity
 
   return
 end
+
+
 !-------------------------------------------------------
-subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
+subroutine stefan1D(temps,dz, isite,lay_idx,flux, nn_grd)
 
   use gipl_bmi
   use thermo
@@ -1055,10 +1071,10 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 
   implicit none
 
-  integer, intent(in) :: n_grd
-  real*8, intent(in) :: dz(n_grd)
-  real*8, intent(inout) :: temps(n_grd)
-  integer, intent(in) :: lay_idx(n_grd)
+  integer, intent(in) :: nn_grd
+  real*8, intent(in) :: dz(nn_grd)
+  real*8, intent(inout) :: temps(nn_grd)
+  integer, intent(in) :: lay_idx(nn_grd)
   real*8 :: futemp,flux,fapp_hcap,ftcon,fsat_unf_water
 
   integer :: isite,i_grd,IT
@@ -1066,13 +1082,13 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 ! tridiagonal variables
   real*8 :: RAB1,RAB2,AKAPA2,AMU2,Q2
   real*8 :: A,B,C,D
-  real*8 :: ALF(n_grd),BET(n_grd)
+  real*8 :: ALF(nn_grd),BET(nn_grd)
   real*8 :: EEY,EEY1,abs1,abs2
 
   ! old temperature before tridiagonal method
-  real*8 :: temp_o(n_grd)
+  real*8 :: temp_o(nn_grd)
   ! new temperature after tridiagonal method
-  real*8 :: temp_n(n_grd)
+  real*8 :: temp_n(nn_grd)
 
 ! time counter internal to this subroutine
   real*8 :: time_l                    ! loop time in a subroutine
@@ -1127,7 +1143,7 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
     temp_n(n_grd)=flux
   endif
 
-! calculates new tempratures
+! calculates new temperatures
   do i_grd=1,n_grd-1
     temp_n(n_grd-i_grd)=ALF(n_grd-i_grd+1)*temp_n(n_grd-i_grd+1)+&
             BET(n_grd-i_grd+1)
@@ -1168,6 +1184,7 @@ subroutine stefan1D(temps,n_grd,dz, isite,lay_idx,flux)
 
 end subroutine stefan1D
 
+
 subroutine filexist(filename)
   implicit none
   character(64) :: filename
@@ -1177,4 +1194,4 @@ subroutine filexist(filename)
     write(*,'(/'' FILE '',a, '' DOESNT EXIST'')')trim(filename)
     stop
   endif
-end subroutine filexist!-----------------------------------------------
+end subroutine filexist
