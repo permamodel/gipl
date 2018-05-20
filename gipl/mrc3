@@ -1,5 +1,5 @@
 # mrc: make, run, compare
-make clean
+make clean_fortran
 echo "rm ./output/mean.txt"
 rm ./output/mean.txt
 echo "rm ./output/start.txt"
