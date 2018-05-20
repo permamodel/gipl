@@ -418,6 +418,20 @@ class BmiGiplMethod(object):
         self.get_value_ref(var_name).flat[indices] = new_var_values
 
 
+    def get_var_type(self, var_name):
+        return str(self.get_value_ref(var_name).dtype)
+
+
+    def get_var_nbytes(self, var_name):
+        return np.asarray(self.get_value_ref(var_name)).nbytes
+
+    def get_component_name(self):
+        return self._name
+
+    def get_var_itemsize(self, var_name):
+        return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
+
+
 if __name__ == '__main__':
     # Note: this currently just runs the code, rather than running via BMI
 
@@ -447,5 +461,14 @@ if __name__ == '__main__':
         bmigipl._model.write_output()
 
         python_time_loop += python_n_time
+
+        print('temperature data type: {}'.format(
+            bmigipl.get_var_type('soil__temperature')))
+
+        print('temperature nbytes: {}'.format(
+            bmigipl.get_var_nbytes('soil__temperature')))
+
+        print('temperature itemsize: {}'.format(
+            bmigipl.get_var_itemsize('soil__temperature')))
 
     bmigipl.finalize()
