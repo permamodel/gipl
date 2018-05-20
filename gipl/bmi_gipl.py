@@ -37,12 +37,12 @@ CONVENTIONS:
 
 
 TODO:
+    add BMI grid functions
+
     change Fortran code to use a single array of input values,
         e.g. don't overwrite with interpolated values if a value has already
             been specified, and  use setattr/getattr to pass arrays
         and move snd, stcon, etc arrays back to their original modules
-
-    rewrite access routines to use getattr() and setattr()
 
     Use mod(timestep, n_time) to bmi_output from outputvar arrays
 
@@ -273,21 +273,25 @@ class BmiGiplMethod(object):
                 'time_beg',
             'model_end__time':
                 'time_end',
-            'model_start__timestep':
+            'model_first__timestep':
                 'time_s',
-            'model_end__timestep':
+            'model_last__timestep':
                 'time_e',
         }
 
         # Each variable name should have an associated unit
         self._var_units_map = {
             'atmosphere_bottom_air__temperature':    'deg_c',
-            'surface__snow_depth':                   'meters',
-            'surface__snow_thermal_conductivity':    '1',
+            'surface__snow_depth':                   'm',
+            'surface__snow_thermal_conductivity':    'W m^-1 K^-1',
             'soil__temperature':                     'deg_c',
-            'freeze_up__temperature':                'deg_c',
-            'snow_level':                            'meters',
-            'freezing_front__depth':                 'meters',
+            'freeze_up__time__monthly':              'years',
+            'freeze_up__temperature_monthly':        'deg C',
+            'snow_level__monthly':                   'm',
+            'freeze_up__time__annual':               'years',
+            'freeze_up__temperature_annual':         'deg C',
+            'snow_level__annual':                    'm',
+            'freezing_front__depth':                 'm',
             'freeze_up__time_current':               'years',
             'freeze_up__time_total':                 'years',
             'model_current__timestep':               '1',
@@ -297,33 +301,58 @@ class BmiGiplMethod(object):
             'model_sites__number':                   '1',
             'model_start__time':                     '1',
             'model_end__time':                       '1',
-            'model_start__timestep':                 '1',
-            'model_end__timestep':                   '1',
+            'model_first__timestep':                 '1',
+            'model_last__timestep':                  '1',
         }
 
         # Each variable is associated with a grid
         self._var_grid_map = {
-            'atmosphere_bottom_air__temperature':    'grid_everyts_float',
-            'surface__snow_depth':                   'grid_everyts_float',
-            'surface__snow_thermal_conductivity':    'grid_everyts_float',
-            'soil__temperature':                     'grid_z_float',
-            'freeze_up__temperature':                'grid_everyts_float',
-            'snow_level':                            'grid_everyts_float',
-            'freezing_front__depth':                 'grid_annualts_float',
-            'freeze_up__time_current':               'grid_annualts_float',
-            'freeze_up__time_total':                 'grid_annualts_float',
+            'atmosphere_bottom_air__temperature':    'grid_float_everyts',
+            'surface__snow_depth':                   'grid_float_everyts',
+            'surface__snow_thermal_conductivity':    'grid_float_everyts',
+
+            'soil__temperature':                     'grid_float_site_z',
+
+            'freeze_up__time__monthly':              'grid_float_month_site',
+            'freeze_up__temperature_monthly':        'grid_float_month_site',
+            'snow_level__monthly':                   'grid_float_month_site',
+
+            'freeze_up__time__annual':               'grid_float_site',
+            'freeze_up__temperature_annual':         'grid_float_site',
+            'snow_level__annual':                    'grid_float_site',
+
+            'freezing_front__depth':                 'grid_float_site',
+            'freeze_up__time_current':               'grid_float_site',
+            'freeze_up__time_total':                 'grid_float_site',
+
+            'model_current__timestep':               'point_float',
+            'model_timesteps_per_year':              'point_int',
+            'model_num_levels__depth':               'point_int',
+            'model_num_levels__depth_selected':      'point_int',
+
+            'model_sites__number':                   'point_int',
+            'model_start__time':                     'point_float',
+            'model_end__time':                       'point_float',
+            'model_first__timestep':                 'point_float',
+            'model_last__timestep':                  'point_float',
         }
 
         self._grid_numbers = {
-            'grid_everyts_float':  0,
-            'grid_annualts_float': 1,
-            'grid_z_float':        2,
+            'point_int':              0,
+            'point_float':            1,
+            'grid_float_site':        2,
+            'grid_float_site_z':      3,
+            'grid_float_everyts':     4,
+            'grid_float_month_site':  5,
         }
 
         self._grid_types = {
-            'grid_everyts_float':  'uniform_rectilinear',
-            'grid_annualts_float': 'uniform_rectilinear',
-            'grid_z_float':        'rectilinear',
+            'point_int':              'point',
+            'point_float':            'point',
+            'grid_float_site':        'uniform_rectilinear',
+            'grid_float_site_z':      'rectilinear',
+            'grid_float_everyts':     'uniform_rectilinear',
+            'grid_float_month_site':  'uniform_rectilinear',
         }
 
 
@@ -461,14 +490,4 @@ if __name__ == '__main__':
         bmigipl._model.write_output()
 
         python_time_loop += python_n_time
-
-        print('temperature data type: {}'.format(
-            bmigipl.get_var_type('soil__temperature')))
-
-        print('temperature nbytes: {}'.format(
-            bmigipl.get_var_nbytes('soil__temperature')))
-
-        print('temperature itemsize: {}'.format(
-            bmigipl.get_var_itemsize('soil__temperature')))
-
     bmigipl.finalize()
