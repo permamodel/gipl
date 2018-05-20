@@ -188,7 +188,12 @@ class BmiGiplMethod(object):
     """ Implement a BMI interface to Fortran-90 based GIPL model via f2py """
 
     def __init__(self):
-        self._model = None
+        self._model = f2py_gipl
+
+        # For now, all variables of interest in Python will be defined
+        #   in the gipl_bmi module.
+        self._fortran_module_ref = self._model.gipl_bmi
+
         self._grids = {}
         self.ngrids = 0
         self.default_config_filename = './gipl_config_3yr.cfg'
@@ -225,27 +230,53 @@ class BmiGiplMethod(object):
         )
 
         # Standard names should correspond to variables in the model code
-        # NOTE: Some of these don't yet exist in the Fortran code, except
-        #       as temporary entries in "save" arrays
+        # Note: Currently, all variables here are assumed to be defined
+        #       in the module 'gipl_bmi' in the fortran code.
         self._var_name_map = {
-            'atmosphere_bottom_air__temperature':    'utemp_i',
-            'surface__snow_depth':                   'snd_i',
-            'surface__snow_thermal_conductivity':    'stcon_i',
-            'soil__temperature':                     'temp',
-            'freeze_up__temperature':                'fu_temp',
-            'snow_level':                            'snow_level',
-            'freezing_front__depth':                 'cfrz_frn',
-            'freeze_up__time_current':               'frz_up_time_cur',
-            'freeze_up__time_total':                 'frz_up_time_tot',
-            'model_current__timestep':               'time_loop',
-            'model_timesteps_per_year':              'n_time',
-            'model_num_levels__depth':               'n_grd',
-            'model_num_levels__depth_selected':      'm_grd',
-            'model_sites__number':                   'n_site',
-            'model_start__time':                     'time_beg',
-            'model_end__time':                       'time_end',
-            'model_start__timestep':                 'time_s',
-            'model_end__timestep':                   'time_e',
+            'atmosphere_bottom_air__temperature':
+                'surface_temp',
+            'surface__snow_depth':
+                'snow_depth',
+            'surface__snow_thermal_conductivity':
+                'snow_thermal_conductivity',
+            'soil__temperature':
+                'temp',
+            'freeze_up__time__monthly':
+                'monthly_time',
+            'freeze_up__temperature__monthly':
+                'monthly_freeze_up_temp',
+            'snow_level__monthly':
+                'monthly_snow_level',
+            'freeze_up__time__annual':
+                'annual_average_time',
+            'freeze_up__temperature__annual':
+                'annual_freeze_up_temp',
+            'snow_level__annual':
+                'annual_snow_level',
+            'freezing_front__depth':
+                'freeze_up_depth',
+            'freeze_up__time_current':
+                'freeze_up_time_current',
+            'freeze_up__time_total':
+                'freeze_up_time_total',
+            'model_current__timestep':
+                'time_loop',
+            'model_timesteps_per_year':
+                'n_time',
+            'model_num_levels__depth':
+                'n_grd',
+            'model_num_levels__depth_selected':
+                'm_grd',
+            'model_sites__number':
+                'n_site',
+            'model_start__time':
+                'time_beg',
+            'model_end__time':
+                'time_end',
+            'model_start__timestep':
+                'time_s',
+            'model_end__timestep':
+                'time_e',
         }
 
         # Each variable name should have an associated unit
@@ -297,7 +328,6 @@ class BmiGiplMethod(object):
 
 
     def initialize(self, cfg_filename=None):
-        self._model = f2py_gipl
         if cfg_filename:
             self._model.initialize(cfg_filename)
         else:
@@ -345,7 +375,6 @@ class BmiGiplMethod(object):
 
 
     def finalize(self):
-        # Close any input files
         self._model.finalize()
 
 
@@ -365,67 +394,20 @@ class BmiGiplMethod(object):
         return self._model.get_float_val('time_loop')
 
 
-    def get_value(self, var_name):
-        return get_gipl_var(self, self._var_name_map[var_name])
-
-
-''' BMI functions to implement: (copied from bmi_frost_number_Geo.py
-
-    def get_grid_type(self, grid_number):
-        return self._grid_type[grid_number]
-
     def get_value_ref(self, var_name):
-        return self._values[var_name]
+        return getattr(self._fortran_module_ref,
+                       self._var_name_map[var_name])
 
-    def set_value(self, var_name, new_var_values):
-        val = self.get_value_ref(var_name)
-        val.flat = new_var_values
 
-    def set_value_at_indices(self, var_name, indices, new_var_values):
-        self.get_value_ref(var_name).flat[indices] = new_var_values
+    def get_value(self, var_name):
+        return self.get_value_ref(var_name).copy()
 
-    def get_var_itemsize(self, var_name):
-        return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
 
-    def get_value_at_indices(self, var_name, indices):
-        return self.get_value_ref(var_name).take(indices)
-
-    def get_var_nbytes(self, var_name):
-        return np.asarray(self.get_value_ref(var_name)).nbytes
-
-    def get_var_type(self, var_name):
-        return str(self.get_value_ref(var_name).dtype)
-
-    def get_component_name(self):
-        return self._name
-
-    def get_var_grid(self, var_name):
-        for grid_id, var_name_list in self._grids.items():
-            if var_name in var_name_list:
-                return grid_id
-
-    def get_grid_shape(self, grid_id):
-        var_name = self._grids[grid_id]
-        value = np.array(self.get_value_ref(var_name)).shape
-        return value
-
-    def get_grid_size(self, grid_id):
-        grid_size = self.get_grid_shape(grid_id)
-        if grid_size == ():
-            return 1
-        else:
-            return int(np.prod(grid_size))
-
-    def get_grid_spacing(self, grid_id):
-        assert_true(grid_id < self.ngrids)
-        return np.array([1, 1], dtype='float32')
-
-    def get_grid_origin(self, grid_id):
-        return np.array([0.0, 0.0], dtype='float32')
-
-    def get_grid_rank(self, var_id):
-        return len(self.get_grid_shape(var_id))
-'''
+    def set_value(self, var_name, src):
+        setattr(self._fortran_module_ref,
+                self._var_name_map[var_name],
+                src)
+        #self.get_value_ref(var_name) = src
 
 
 if __name__ == '__main__':
@@ -449,6 +431,7 @@ if __name__ == '__main__':
         bmigipl.update()
         bmigipl.update_until(
             python_time_loop + (python_n_time - 3) * python_time_step)
+        time_loop_in_loop = bmigipl.get_value('model_current__timestep')
         bmigipl.update()
         bmigipl.update()
         bmigipl._model.write_output()

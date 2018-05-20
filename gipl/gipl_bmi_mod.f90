@@ -40,6 +40,7 @@ module gipl_bmi
   real*8, allocatable, dimension(:) :: freeze_up_time_total   ! site
 
   ! Written to file 3, restart_file: 'start.txt'
-  ! This is the temperature at depths, array 'temp'
+  ! soil temperature 
+  real*8, allocatable,dimension(:,:) :: temp
 
 end module gipl_bmi

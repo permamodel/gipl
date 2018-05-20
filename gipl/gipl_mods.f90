@@ -9,10 +9,10 @@ end module gipl_const
 
 module bnd
   integer :: n_temp                                       ! number of upper boundary points for temperature (input)
-  real*8,allocatable,dimension(:)::  utemp_time         ! upper boundary time and temperature (input)
-  real*8,allocatable,dimension(:,:)::  utemp         ! upper boundary time and temperature (input)
-  real*8,allocatable,dimension(:)::  utemp_time_i(:)     ! time and upper boundary temprature (interpolated)
-  real*8,allocatable,dimension(:,:)::  utemp_i(:,:)     ! time and upper boundary temprature (interpolated)
+  real*8,allocatable,dimension(:):: utemp_time         ! upper boundary time and temperature (input)
+  real*8,allocatable,dimension(:,:):: utemp         ! upper boundary time and temperature (input)
+  real*8,allocatable,dimension(:):: utemp_time_i(:)     ! time and upper boundary temprature (interpolated)
+  real*8,allocatable,dimension(:,:):: utemp_i(:,:)     ! time and upper boundary temprature (interpolated)
   integer :: n_snow                                       ! number of upper boundary points for snow (input)
   real*8 ,allocatable,dimension(:):: snd_time(:)              ! upper boundary snow time and snow depth (input)
   real*8 ,allocatable,dimension(:,:):: snd(:,:)              ! upper boundary snow time and snow depth (input)
@@ -65,7 +65,8 @@ module thermo
 
   real*8 :: hcap_s                                         ! heat capacity of snow (constant) nondimentional
 
-  real*8, allocatable,dimension(:,:) :: temp                        ! soil temperature
+  ! temp is now defined in gipl_bmi_mod.f90
+  !real*8, allocatable,dimension(:,:) :: temp                        ! soil temperature
   real, allocatable,dimension(:,:):: n_bnd_lay                      ! number of boundaries between layer in soil
   integer k0
 
