@@ -633,21 +633,6 @@ subroutine initialize(named_config_file)
   time_loop=0.0D0
   TINIR=0.0D0
 
-  ! Test section to allocate and assign initial values to test array
-  allocate(intarray3d(3, 4, 5))
-  allocate(doublearray3d(3, 4, 5))
-
-  do i=1,3
-    do j=1,4
-      do k=1,5
-        intarray3d(i, j, k) = i + j*3 + (k-4)
-        doublearray3d(i, j, k) = 0.5*i + j*3.3 + (k-4.2)
-      enddo
-    enddo
-  enddo
-
-  print*,intarray3d(2,2,2)
-
 end subroutine initialize
 
 subroutine init_cond(q,last)

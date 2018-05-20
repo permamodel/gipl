@@ -7,31 +7,47 @@ Python 2 code providing the BMI interface to GIPL
 See also example usage code in bmi_gipl_examples.py
 
 NOTES:
-    Tested instantiating two different BmiGiplMethods at once.
-      If they use the same shared object library via 'import',
-      for instance both use f2py_gipl, then the namespaces of
-      the two Methods collide.
-    If two different shared object libraries are used, e.g. by
-      compiling the same code to f2py_gipl2.so, then the namespaces
-      are independent.
-    If two different python calls are made to the same shared object
-      library, then the two namespaces are independent: e.g. by
-      running make and creating a different .so file.
+    Regarding namespace independence:
+        Tested instantiating two different BmiGiplMethods at once.
+            If they use the same shared object library via 'import',
+            for instance both use f2py_gipl, then the namespaces of
+            the two Methods collide.
+        If two different shared object libraries are used, e.g. by
+            compiling the same code to f2py_gipl2.so, then the namespaces
+            are independent.
+        If two different python calls are made to the same shared object
+            library, then the two namespaces are independent: e.g. by
+            running make and creating a different .so file.
+
+    Regarding direct access to Fortran variables from Python:
+        Variables in Fortran modeles are accessible from Python
+        However, if the variables are allocatable, they do *not* show
+            up in the vars() or dir() lists.  (The are still accessible.)
+        A three dimension array allocated in Fortran as:
+                array3d(xdim, ydim, zdim)
+            is referenced in Python as:
+                array3d[0:xdim-1, 0:ydim-1, 0:zdim-1]
+
+CONVENTIONS:
+    When referencing arrays in Python, it will be assumed tha 0-based indexing
+        will be used in the Python code.  Therefore:
+                array(1)    (in Fortran)
+            is the same as
+                array[0]    (in Python)
+
 
 TODO:
-done write get_gipl_val() which wrap get_float_val() etc
-    write set_gipl_val() which wrap set_float_val() etc
-dont Write BmiVariable and BmiGrid classes to better organize variable and
-dont   grid information
-done Generate code below to run entirely using BMI function calls
-done Probably put new variables in Fortran code to properly store outputs
-done   to arrays, rather than to temporary arrays and files
-done First pass: use n_time loop and write_output() to get exact output match
-    Second pass: Use mod(timestep, n_time) to bmi_output from outputvar arrays
-    use setattr/getattr to pass arrays between Python and Fortran
-    Try to structure files as python package
-    Move docs, examples, around.  Generate license file
+    change Fortran code to use a single array of input values,
+        e.g. don't overwrite with interpolated values if a value has already
+            been specified, and  use setattr/getattr to pass arrays
+        and move snd, stcon, etc arrays back to their original modules
 
+    rewrite access routines to use getattr() and setattr()
+
+    Use mod(timestep, n_time) to bmi_output from outputvar arrays
+
+    Try to structure files as python package
+        e.g.: Move docs, examples, around.  Generate license file
 """
 
 from __future__ import print_function
@@ -422,51 +438,6 @@ if __name__ == '__main__':
     else:
         bmigipl.initialize(sys.argv[1])
 
-    # Example of direct modification to Fortran array in Python
-    py_int3d = bmigipl._model.gipl_bmi.intarray3d
-    print('int3darray:')
-    print(py_int3d)
-
-    print('int3darray.ndim:')
-    print(py_int3d.ndim)
-
-    print('int3darray.shape:')
-    print(py_int3d.shape)
-
-    print('int3darray[2, 2, 2]:')
-    print(py_int3d[2 - 1, 2 - 1, 2 - 1])
-
-    print('setting int3d(2, 2, 2) [Fortran numbering] to 42')
-    py_int3d[2 - 1, 2 - 1, 2 - 1] = 42
-
-    # Example of setting Fortran array in Python via setattr/getattr
-    fortmod = bmigipl._model.gipl_bmi
-    fortvar = 'doublearray3d'
-    print(dir(fortmod))
-    print(vars(fortmod))
-    print('-----------------------------------------------------------')
-    print('doublearray3d directly:')
-    print(bmigipl._model.gipl_bmi.doublearray3d)
-    print('-----------------------------------------------------------')
-    print('doublearray3d via getattr():')
-    print(getattr(bmigipl._model.gipl_bmi, 'doublearray3d'))
-    orig_array_vals = getattr(bmigipl._model.gipl_bmi, 'doublearray3d')
-    new_array_vals = np.add(orig_array_vals, 2.5)
-    setattr(bmigipl._model.gipl_bmi, 'doublearray3d', new_array_vals)
-    print('-----------------------------------------------------------')
-    print('after modification, array is:')
-    print(getattr(bmigipl._model.gipl_bmi, 'doublearray3d'))
-    print('-----------------------------------------------------------')
-    #print('via getattr(): doublearray3d(3,4,5):')
-    #print(getattr(bmigipl._model.gipl_bmi, 'doublearray3d(3,4,5)'))
-    local_array_ref = bmigipl._model.gipl_bmi.doublearray3d
-    print('local_array_ref(1, 2, 3): {}'.format(local_array_ref[1, 2, 3]))
-    print('local_array_ref(1, 1, 1): {}'.format(local_array_ref[1, 1, 1]))
-    #array_at_2_3_4 = getattr('{}.{}fortmod, fortvar)
-    #print('array_at_2_3_4: {}'.format(array_at_2_3_4))
-    exit(0)
-
-
     python_time_loop = bmigipl.get_value('model_current__timestep')
     python_time_step = bmigipl.get_time_step()
     python_time_e = bmigipl.get_end_time()
@@ -476,9 +447,6 @@ if __name__ == '__main__':
         print('in python, time_loop: {}'.format(python_time_loop))
 
         bmigipl.update()
-        print('after update, py_int3d[2 - 1, 2 - 1, 2 - 1]: {}'.format(
-            py_int3d[2 - 1, 2 - 1, 2 - 1]))
-        exit(0)
         bmigipl.update_until(
             python_time_loop + (python_n_time - 3) * python_time_step)
         bmigipl.update()
