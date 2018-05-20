@@ -458,8 +458,14 @@ subroutine get_float_array2d_element(array_name, x_index, y_index, array_val)
     array_val = snd_i(x_index, y_index)
   elseif (array_name .eq. 'stcon_i') then
     array_val = stcon_i(x_index, y_index)
-  elseif (array_name .eq. 'res') then
-    array_val = res(x_index, y_index)
+  elseif (array_name .eq. 'monthly_time') then
+    array_val = monthly_time(x_index, y_index)
+  elseif (array_name .eq. 'monthly_freeze_up_temp') then
+    array_val = monthly_freeze_up_temp(x_index, y_index)
+  elseif (array_name .eq. 'monthly_snow_level') then
+    array_val = monthly_snow_level(x_index, y_index)
+  !elseif (array_name .eq. 'monthly_temperature') then
+  !  array_val = monthly_temperature(x_index, y_index)
   else
     print*,'Fortran BMI error: get_float_array2d_element name not recognized: ', array_name
     stop
@@ -492,8 +498,14 @@ subroutine set_float_array2d_element(array_name, x_index, y_index, array_val)
     snd_i(x_index, y_index) = array_val
   elseif (array_name .eq. 'stcon_i') then
     stcon_i(x_index, y_index) = array_val
-  elseif (array_name .eq. 'res') then
-    res(x_index, y_index) = array_val
+  elseif (array_name .eq. 'monthly_time') then
+    monthly_time(x_index, y_index) = array_val
+  elseif (array_name .eq. 'monthly_freeze_up_temp') then
+    monthly_freeze_up_temp(x_index, y_index) = array_val
+  elseif (array_name .eq. 'monthly_snow_level') then
+    monthly_snow_level(x_index, y_index) = array_val
+  !elseif (array_name .eq. 'monthly_temperature') then
+  !  monthly_temperature(x_index, y_index) = array_val
   else
     print*,'Fortran BMI error: set_float_array2d_element array_name not recognized: ',&
       array_name

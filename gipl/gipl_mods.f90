@@ -77,7 +77,7 @@ module thermo
   integer, allocatable ,dimension(:):: geo_code,gt_zone_code     ! (not necccessary) required for runing in parallel
   real*8, allocatable  ,dimension(:):: temp_grd                     ! temprature gradient at the lower boundary
 
-  real*8 ,allocatable,dimension(:,:):: RES                          ! unified variable for the writing results into the file
+  !real*8 ,allocatable,dimension(:,:):: RES                          ! unified variable for the writing results into the file
 
 end module thermo
 

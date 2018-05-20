@@ -20,11 +20,11 @@ NOTES:
 
 TODO:
     write get_gipl_val() and set_gipl_val() which wrap get_float_val() etc
-    Write BmiVariable and BmiGrid classes to better organize variable and
-      grid information
-    Generate code below to run entirely using BMI function calls
-    Probably put new variables in Fortran code to properly store outputs
-      to arrays, rather than to temporary arrays and files
+dont Write BmiVariable and BmiGrid classes to better organize variable and
+dont   grid information
+done Generate code below to run entirely using BMI function calls
+done Probably put new variables in Fortran code to properly store outputs
+done   to arrays, rather than to temporary arrays and files
 done First pass: use n_time loop and write_output() to get exact output match
     Second pass: Use mod(timestep, n_time) to bmi_output from outputvar arrays
     Try to structure files as python package

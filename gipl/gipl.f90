@@ -179,8 +179,6 @@ subroutine write_output()
 
   integer :: i_site, j_time, i_grd
 
-  real*8 :: res_save(m_grd+3,n_site) ! save results into 2D array
-
   real*8 :: dfrz_frn(n_time)             ! depth of the freezing front
   real :: frz_up_time_cur            ! freezeup time current (within a year)
   real :: frz_up_time_tot            ! freezeup time global
@@ -190,7 +188,11 @@ subroutine write_output()
     do i_site=1,n_site
       if(time_s.LT.time_e.AND.time_loop.GT.time_s)then
         do j_time=1,n_time
-          write(1,FMT1) i_site, (RES(j_time,i_grd),i_grd=1,m_grd+3)
+          write(1,FMT1) i_site, &
+            monthly_time(i_site, j_time), &
+            monthly_freeze_up_temp(i_site, j_time), &
+            monthly_snow_level(i_site, j_time), &
+            (monthly_temperature(i_site, j_time, i_grd), i_grd=1,m_grd)
         enddo
       endif
     enddo
@@ -199,16 +201,15 @@ subroutine write_output()
   ! Write mean results
   if (mod(int(time_loop), n_time) .eq. n_time - 1) then
     do i_site=1,n_site
-      do i_grd=1,m_grd+3
-        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
-      enddo
-    enddo
-
-    ! Do the same averaging that res_save did
-    do i_site=1,n_site
-      annual_snow_level(i_site)=sum((RES(:,i_grd)))
-      do i_grd=1,m_grd+3
-        res_save(i_grd,i_site)=sum((RES(:,i_grd)))
+      annual_average_time(i_site) = &
+        sum(monthly_time(i_site,:)) / dble(n_time)
+      annual_freeze_up_temp(i_site) = &
+        sum(monthly_freeze_up_temp(i_site,:)) / dble(n_time)
+      annual_snow_level(i_site) = &
+        sum(monthly_snow_level(i_site, :)) / dble(n_time)
+      do i_grd=1,m_grd
+        annual_temperature(i_site, i_grd) = &
+          sum(monthly_temperature(i_site, :, i_grd)) / dble(n_time)
       enddo
     enddo
 
@@ -218,7 +219,7 @@ subroutine write_output()
       do j_time=2,n_time
         if((n_frz_frn(j_time,i_site)-n_frz_frn(j_time-1,i_site)).EQ.-2)then
           if(z_frz_frn(j_time-1,n_frz_frn(j_time-1,i_site),i_site).GE.&
-                  frz_frn_min) frz_up_time_cur=SNGL(RES(j_time,1))
+                  frz_frn_min) frz_up_time_cur=SNGL(monthly_time(j_time,1))
         endif
       enddo
 
@@ -229,10 +230,22 @@ subroutine write_output()
       dfrz_frn=z_frz_frn(:,1,i_site)
     enddo
 
+    do i_site = 1, n_site
+      freeze_up_depth(i_site) = dfrz_frn(n_time)
+      freeze_up_time_current(i_site) = frz_up_time_cur
+      freeze_up_time_total(i_site) = frz_up_time_tot
+    enddo
+
     do i_site=1,n_site
-      write(2,FMT2) i_site,(res_save(i_grd,i_site)/DBLE(n_time),&
-              i_grd=1,m_grd+3), &
-        dfrz_frn(n_time),frz_up_time_cur,frz_up_time_tot
+      write(2,FMT2) &
+        i_site, &
+        annual_average_time(i_site), &
+        annual_freeze_up_temp(i_site), &
+        annual_snow_level(i_site), &
+        (annual_temperature(i_site, i_grd), i_grd=1,m_grd), &
+        freeze_up_depth(i_site), &
+        freeze_up_time_current(i_site), &
+        freeze_up_time_total(i_site)
     enddo
   endif
 
@@ -547,7 +560,6 @@ subroutine initialize(named_config_file)
   allocate(z_frz_frn(n_time,n_frz_max,n_site),STAT=IERR)
   allocate(n_frz_frn(n_time,n_site),STAT=IERR)
   allocate(temp_frz(n_lay,n_site),STAT=IERR)
-  allocate(RES(n_time,m_grd+3),STAT=IERR)
   ! active_layer uses i_time below, needs to be initialized here
   i_time=1   ! this is an implicit array assignment
   z=zdepth/zdepth(n_grd)
@@ -590,9 +602,11 @@ subroutine initialize(named_config_file)
   enddo
 
   ! Allocate output arrays
+  allocate(monthly_time(n_site, n_time))
   allocate(monthly_freeze_up_temp(n_site, n_time))
   allocate(monthly_snow_level(n_site, n_time))
   allocate(monthly_temperature(n_site, n_time, m_grd))
+  allocate(annual_average_time(n_site))
   allocate(annual_freeze_up_temp(n_site))
   allocate(annual_snow_level(n_site))
   allocate(annual_temperature(n_site, m_grd))
@@ -703,20 +717,13 @@ subroutine save_results(k, time2, restart_time)
   real*8 :: futemp,fsnow_level
 
   ! Save these values to an array instead of a file
+  monthly_time(k, i_time(k)) = time2 + restart_time
   monthly_freeze_up_temp(k, i_time(k)) = futemp(time2, k)
   monthly_snow_level(k, i_time(k)) = fsnow_level(k, time2)
   do j=1,m_grd
     monthly_temperature(k, i_time(k), j) = temp(k, zdepth_id(j))
   enddo
 
-  ! The following is the original code for writing these results each timestep
-  RES(i_time(k),1)=time2 + restart_time
-  RES(i_time(k),2)=monthly_freeze_up_temp(k, i_time(k))
-  RES(i_time(k),3)=monthly_snow_level(k, i_time(k))
-  do  J=1,m_grd
-    RES(i_time(k),J+3)=monthly_temperature(k, i_time(k), j)
-  enddo
-  
 end subroutine save_results
 
 !________________________________________________

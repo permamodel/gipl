@@ -29,6 +29,7 @@ module gipl_bmi
 
   ! Written to file 1, result_file: 'result.txt'
   ! Effectively printed every timestep
+  real*8,allocatable,dimension(:,:) :: monthly_time           ! site,month
   real*8,allocatable,dimension(:,:) :: monthly_freeze_up_temp ! site,month
   real*8,allocatable,dimension(:,:) :: monthly_snow_level     ! site,month
   real*8,allocatable,dimension(:,:,:) :: monthly_temperature  ! site,month,depth
@@ -36,6 +37,7 @@ module gipl_bmi
   ! Written to file 2, aver_res_file: 'mean.txt'
   ! Annual averages, so written  at end of each year
   ! Compute average of "file 1" values, and:
+  real*8, allocatable, dimension(:) :: annual_average_time    ! site
   real*8, allocatable, dimension(:) :: annual_freeze_up_temp  ! site
   real*8, allocatable, dimension(:) :: annual_snow_level      ! site
   real*8, allocatable, dimension(:,:) :: annual_temperature   ! site
