@@ -13,7 +13,7 @@ TODO:
     Generate code below to run entirely using BMI function calls
     Probably put new variables in Fortran code to properly store outputs
       to arrays, rather than to temporary arrays and files
-    First pass: use n_time loop and write_output() to get exact output match
+done  First pass: use n_time loop and write_output() to get exact output match
     Second pass: Use mod(timestep, n_time) to bmi_output from outputvar arrays
     Try to structure files as python package
     Move docs, examples, around.  Generate license file
@@ -25,6 +25,7 @@ from __future__ import print_function
 import sys
 import numpy as np
 import f2py_gipl
+import f2py_gipl2
 
 
 # Unset the default of printing numpy arrays in scientific notation
@@ -50,6 +51,7 @@ def initialize_f2py_gipl():
 
 def get_gipl_var(bmimethod, var_name):
     """ return the value of this gipl_variable """
+    print('bmimethod: {}'.format(bmimethod))
     if var_name in ('time_loop', 'time_step', 'time_b', 'time_e'):
         result = bmimethod._model.get_float_val(var_name)
     elif var_name in ('n_time', 'n_grd', 'm_grd', 'n_site'):
@@ -131,11 +133,12 @@ def set_gipl_array(array_name, array_values):
 class BmiGiplMethod(object):
     """ Implement a BMI interface to Fortran-90 based GIPL model via f2py """
 
-    def __init__(self):
+    def __init__(self, model_to_use=None):
         self._model = None
         self._grids = {}
         self.ngrids = 0
         self.default_config_filename = './gipl_config_3yr.cfg'
+        self.model_to_use = model_to_use
 
         self._name = 'GIPL model, f2py version'
         self._attributes = {
@@ -239,7 +242,12 @@ class BmiGiplMethod(object):
 
 
     def initialize(self, cfg_filename=None):
-        self._model = f2py_gipl
+        if self.model_to_use is not None:
+            self._model = self.model_to_use
+            print('Succeeding in using model: {}'.format(self.model_to_use))
+        else:
+            self._model = f2py_gipl
+
         if cfg_filename:
             self._model.initialize(cfg_filename)
         else:
@@ -368,11 +376,17 @@ if __name__ == '__main__':
     #initialize_f2py_gipl()
 
     bmigipl = BmiGiplMethod()
+    bmigipl2 = BmiGiplMethod(f2py_gipl2)
+    bmigipl3 = BmiGiplMethod(f2py_gipl)
 
     if len(sys.argv) == 1:
         bmigipl.initialize()
+        bmigipl2.initialize()
+        bmigipl3.initialize()
     else:
         bmigipl.initialize(sys.argv[1])
+        bmigipl2.initialize(sys.argv[1])
+        bmigipl3.initialize(sys.argv[1])
 
     python_time_loop = bmigipl.get_value('model_current__timestep')
     python_time_step = bmigipl.get_time_step()
@@ -381,6 +395,12 @@ if __name__ == '__main__':
 
     while python_time_loop < python_time_e:
         print('in python, time_loop: {}'.format(python_time_loop))
+        print('   bmigipl time_loop: {}'.format(
+            bmigipl.get_value('model_current__timestep')))
+        print('  bmigipl2 time_loop: {}'.format(
+            bmigipl2.get_value('model_current__timestep')))
+        print('  bmigipl3 time_loop: {}'.format(
+            bmigipl3.get_value('model_current__timestep')))
 
         bmigipl.update()
         bmigipl.update_until(
@@ -392,5 +412,6 @@ if __name__ == '__main__':
         bmigipl._model.write_output()
 
         python_time_loop += python_n_time
+        print(' ')
 
     bmigipl.finalize()
