@@ -407,7 +407,15 @@ class BmiGiplMethod(object):
         setattr(self._fortran_module_ref,
                 self._var_name_map[var_name],
                 src)
-        #self.get_value_ref(var_name) = src
+
+
+    def get_value_at_indices(self, var_name, indices):
+        return self.get_value_ref(var_name).take(indices)
+        #self.get_value_ref(var_name).flat[indices] = new_var_values
+        #return self.get_value_ref(var_name).copy()[indices]
+
+    def set_value_at_indices(self, var_name, indices, new_var_values):
+        self.get_value_ref(var_name).flat[indices] = new_var_values
 
 
 if __name__ == '__main__':
