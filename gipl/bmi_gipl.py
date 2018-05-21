@@ -69,122 +69,6 @@ def print_usage():
     print(' ')
 
 
-def initialize_f2py_gipl():
-    if len(sys.argv) == 1:
-        # Default case is to run the short 3-year monthly run
-        #f2py_gipl.initialize('gipl_config_3yr.cfg')
-        f2py_gipl.initialize('../examples/gipl_config_3yr.cfg')
-    else:
-        # Note: Fortran error just stops the code, so can't trap an Exception
-        f2py_gipl.initialize(sys.argv[1])
-
-
-def get_gipl_var(bmimethod, var_name):
-    """ return the value of this gipl_variable """
-    if var_name in ('time_loop', 'time_step', 'time_b', 'time_e'):
-        result = bmimethod._model.get_float_val(var_name)
-    elif var_name in ('n_time', 'n_grd', 'm_grd', 'n_site'):
-        result = bmimethod._model.get_int_val(var_name)
-    else:
-        raise ValueError('gipl variable not recognized: {}'.format(var_name))
-
-    return result
-
-
-def get_gipl_array(array_name):
-    # Not sure how to generically send info to f2py
-    # without manually editing a signature file, so this stands between
-    if array_name == 'zdepth':
-        # zdepth is a 1-D array in depth
-        n_levels = f2py_gipl.get_int_val('n_grd')
-        returned_array = f2py_gipl.get_float_array1d('zdepth', n_levels)
-    elif array_name == 'temp':
-        # temp is a 2-D array in depth
-        xdim = f2py_gipl.get_int_val('n_site')
-        ydim = f2py_gipl.get_int_val('n_grd')
-        returned_array = f2py_gipl.get_float_array2d('temp', xdim, ydim)
-    elif array_name == 'utemp_i':
-        # temp is a 2-D array in depth
-        xdim = f2py_gipl.get_int_val('n_time') + 2
-        ydim = f2py_gipl.get_int_val('n_site')
-        returned_array = f2py_gipl.get_float_array2d('utemp_i', xdim, ydim)
-    elif array_name == 'snd_i':
-        # temp is a 2-D array in depth
-        xdim = f2py_gipl.get_int_val('n_time') + 2
-        ydim = f2py_gipl.get_int_val('n_site')
-        returned_array = f2py_gipl.get_float_array2d('snd_i', xdim, ydim)
-    elif array_name == 'stcon_i':
-        # temp is a 2-D array in depth
-        xdim = f2py_gipl.get_int_val('n_time') + 2
-        ydim = f2py_gipl.get_int_val('n_site')
-        returned_array = f2py_gipl.get_float_array2d('stcon_i', xdim, ydim)
-    else:
-        print('in get_float_val(), array_name not recognized: {}'.format(
-            array_name))
-        raise ValueError('unrecognized array_name in get_gipl_array()')
-
-    return returned_array
-
-
-def set_gipl_array(array_name, array_values):
-    # Not sure how to generically send info to f2py
-    # without manually editing a signature file, so this stands between
-    if array_name == 'zdepth':
-        # zdepth is a 1-D array in depth
-        assert array_values.ndim == 1
-        n_levels = f2py_gipl.get_int_val('n_grd')
-        assert array_values.size == n_levels
-        f2py_gipl.set_float_array1d(array_name, array_values)
-    elif array_name == 'temp':
-        # temp is a 2-D array in location, value
-        assert array_values.ndim == 2
-        f2py_gipl.set_float_array2d(array_name, array_values)
-    elif array_name == 'utemp_i':
-        # utemp_i is a 2-D array in time, value
-        assert array_values.ndim == 2
-        f2py_gipl.set_float_array2d(array_name, array_values)
-    elif array_name == 'snd_i':
-        # snd_i is a 2-D array in time, value
-        assert array_values.ndim == 2
-        f2py_gipl.set_float_array2d(array_name, array_values)
-    elif array_name == 'stcon_i':
-        # stcon_i is a 2-D array in time, value
-        assert array_values.ndim == 2
-        f2py_gipl.set_float_array2d(array_name, array_values)
-    else:
-        print('in set_gipl_array(), array_name not recognized: {}'.format(
-            array_name))
-        raise ValueError('unrecognized array_name in set_gipl_array()')
-
-
-
-
-class BmiFortranVariable(object):
-    """ Class to describe variables in the Fortran code accessible via BMI """
-    def __init__(self, fortran_name, fortran_module,
-                 dtype=float, rank=0, isInput=False, isOutput=False,
-                 dim1_var_name=None, dim2_var_name=None, dim3_var_name=None):
-        """ Set the attributes at initialization """
-        self.fortran_name = fortran_name
-        self.fortran_module = fortran_module
-        self.dtype = dtype
-        self.rank = rank
-        self.isInput = isInput
-        self.isOutput = isOutput
-        self.dim1_var_name = dim1_var_name
-        self.dim2_var_name = dim2_var_name
-        self.dim3_var_name = dim3_var_name
-
-
-    def get_val(self):
-        return getattr(self.fortran_module, self.fortran_name)
-
-
-    def set_val(self, var_value):
-        setattr(self.fortran_module, self.fortran_name, var_value)
-
-
-
 class BmiGiplMethod(object):
     """ Implement a BMI interface to Fortran-90 based GIPL model via f2py """
 
@@ -198,7 +82,6 @@ class BmiGiplMethod(object):
         self._grids = {}
         self.ngrids = 0
 
-        #self.default_config_filename = './gipl_config_3yr.cfg'
         self.default_config_filename = '../examples/gipl_config_3yr.cfg'
 
         self._name = 'GIPL model, f2py version'
@@ -262,6 +145,8 @@ class BmiGiplMethod(object):
                 'freeze_up_time_current',
             'freeze_up__time_total':
                 'freeze_up_time_total',
+            'model__timestep':
+                'time_step',
             'model_current__timestep':
                 'time_loop',
             'model_timesteps_per_year':
@@ -297,6 +182,7 @@ class BmiGiplMethod(object):
             'freezing_front__depth':                 'm',
             'freeze_up__time_current':               'years',
             'freeze_up__time_total':                 'years',
+            'model__timestep':                       'months',
             'model_current__timestep':               '1',
             'model_timesteps_per_year':              '1',
             'model_num_levels__depth':               '1',
@@ -328,6 +214,7 @@ class BmiGiplMethod(object):
             'freeze_up__time_current':               'grid_float_site',
             'freeze_up__time_total':                 'grid_float_site',
 
+            'model__timestep':                       'point_float',
             'model_current__timestep':               'point_float',
             'model_timesteps_per_year':              'point_int',
             'model_num_levels__depth':               'point_int',
@@ -364,15 +251,6 @@ class BmiGiplMethod(object):
             self._model.initialize(cfg_filename)
         else:
             self._model.initialize(self.default_config_filename)
-
-        model_current__timestep = BmiFortranVariable(
-            'time_loop', self._model)
-        model_timesteps_per_year = BmiFortranVariable(
-            'n_time', self._model, dtype=np.int32)
-        self.variables = (
-            model_current__timestep,
-            model_timesteps_per_year,
-        )
 
 
     def get_attribute(self, attribute_name):
@@ -415,15 +293,15 @@ class BmiGiplMethod(object):
 
 
     def get_end_time(self):
-        return self._model.get_float_val('time_e')
+        return self.get_value('model_last__timestep')
 
 
     def get_time_step(self):
-        return self._model.get_float_val('time_step')
+        return self.get_value('model__timestep')
 
 
     def get_current_time(self):
-        return self._model.get_float_val('time_loop')
+        return self.get_value('model_current__timestep')
 
 
     def get_value_ref(self, var_name):
@@ -443,8 +321,7 @@ class BmiGiplMethod(object):
 
     def get_value_at_indices(self, var_name, indices):
         return self.get_value_ref(var_name).take(indices)
-        #self.get_value_ref(var_name).flat[indices] = new_var_values
-        #return self.get_value_ref(var_name).copy()[indices]
+
 
     def set_value_at_indices(self, var_name, indices, new_var_values):
         self.get_value_ref(var_name).flat[indices] = new_var_values
@@ -457,18 +334,23 @@ class BmiGiplMethod(object):
     def get_var_nbytes(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).nbytes
 
+
     def get_component_name(self):
         return self._name
 
+
     def get_var_itemsize(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
+
 
     def get_var_grid(self, var_name):
         grid_name = self._var_grid_map[var_name]
         return self._grid_numbers[grid_name]
 
+
     def get_grid_type(self, grid_id):
         return self._grid_types[grid_id]
+
 
     def get_grid_shape(self, grid_id):
         """ find a variable with this grid id, and return its shape """
@@ -476,11 +358,13 @@ class BmiGiplMethod(object):
             if self._grid_numbers[self._var_grid_map[var]] == grid_id:
                 return self.get_value_ref(var).shape
 
+
     def get_grid_rank(self, grid_id):
         """ find a variable with this grid id, and return its shape """
         for var in self._var_grid_map.keys():
             if self._grid_numbers[self._var_grid_map[var]] == grid_id:
                 return self.get_value_ref(var).ndim
+
 
     def get_grid_size(self, grid_id):
         grid_size = self.get_grid_shape(grid_id)
@@ -490,9 +374,7 @@ class BmiGiplMethod(object):
             return int(np.prod(grid_size))
 
 
-
 if __name__ == '__main__':
-    # Note: this currently just runs the code, rather than running via BMI
 
     bmigipl = BmiGiplMethod()
 
