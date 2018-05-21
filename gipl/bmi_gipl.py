@@ -72,7 +72,8 @@ def print_usage():
 def initialize_f2py_gipl():
     if len(sys.argv) == 1:
         # Default case is to run the short 3-year monthly run
-        f2py_gipl.initialize('gipl_config_3yr.cfg')
+        #f2py_gipl.initialize('gipl_config_3yr.cfg')
+        f2py_gipl.initialize('../examples/gipl_config_3yr.cfg')
     else:
         # Note: Fortran error just stops the code, so can't trap an Exception
         f2py_gipl.initialize(sys.argv[1])
@@ -196,7 +197,9 @@ class BmiGiplMethod(object):
 
         self._grids = {}
         self.ngrids = 0
-        self.default_config_filename = './gipl_config_3yr.cfg'
+
+        #self.default_config_filename = './gipl_config_3yr.cfg'
+        self.default_config_filename = '../examples/gipl_config_3yr.cfg'
 
         self._name = 'GIPL model, f2py version'
         self._attributes = {
@@ -517,25 +520,5 @@ if __name__ == '__main__':
         bmigipl._model.write_output()
 
         python_time_loop += python_n_time
-
-    print(' ')
-
-    time_step_grid = bmigipl.get_var_grid('model_current__timestep')
-    print('time_step_grid_id: {}'.format(time_step_grid))
-    print('  grid type: {}'.format(bmigipl.get_grid_type(time_step_grid)))
-    print('  grid shape: {}'.format(bmigipl.get_grid_shape(time_step_grid)))
-    print('  grid rank: {}'.format(bmigipl.get_grid_rank(time_step_grid)))
-    print('  grid size: {}'.format(bmigipl.get_grid_size(time_step_grid)))
-
-    print(' ')
-
-    temperature_grid = bmigipl.get_var_grid('soil__temperature')
-    print('temperature_grid_id: {}'.format(temperature_grid))
-    print('  grid type: {}'.format(bmigipl.get_grid_type(temperature_grid)))
-    print('  grid shape: {}'.format(bmigipl.get_grid_shape(temperature_grid)))
-    print('  grid rank: {}'.format(bmigipl.get_grid_rank(temperature_grid)))
-    print('  grid size: {}'.format(bmigipl.get_grid_size(temperature_grid)))
-
-    print(' ')
 
     bmigipl.finalize()

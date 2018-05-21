@@ -8,4 +8,4 @@ echo "rm ./output/result.txt"
 rm ./output/result.txt
 make
 ./gipl
-. ./check_noopt_3yr
+. ../examples/check_noopt_3yr

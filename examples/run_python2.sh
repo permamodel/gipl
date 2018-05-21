@@ -14,4 +14,4 @@ echo "python bmi_gipl.py"
 python bmi_gipl.py $1
 
 echo ". ./check_noopt_3yr "
-. ./check_noopt_3yr 
+. ../examples/check_noopt_3yr 

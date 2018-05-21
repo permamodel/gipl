@@ -19,7 +19,8 @@ program gipl2
   if (iargc() .eq. 1) then
     call getarg(1, fconfig)
   else
-    fconfig = 'gipl_config_3yr.cfg'
+    !fconfig = 'gipl_config_3yr.cfg'
+    fconfig = '../examples/gipl_config_3yr.cfg'
   endif
 
   print*,'Running from Fortran with config file: ', fconfig
@@ -316,7 +317,8 @@ subroutine initialize(named_config_file)
     ! No pre-set fconfig, use named_config if it exists, or a default if not
     if (named_config_file .eq. '') then
       ! If nothing is specified, use this default configuration file
-      fconfig = 'gipl_config_3yr.cfg'
+      !fconfig = 'gipl_config_3yr.cfg'
+      fconfig = '../examples/gipl_config_3yr.cfg'
     else
       fconfig = named_config_file
     endif
