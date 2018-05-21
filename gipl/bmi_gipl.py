@@ -347,12 +347,12 @@ class BmiGiplMethod(object):
         }
 
         self._grid_types = {
-            'point_int':              'point',
-            'point_float':            'point',
-            'grid_float_site':        'uniform_rectilinear',
-            'grid_float_site_z':      'rectilinear',
-            'grid_float_everyts':     'uniform_rectilinear',
-            'grid_float_month_site':  'uniform_rectilinear',
+            0:              'point',
+            1:              'point',
+            2:              'uniform_rectilinear',
+            3:              'rectilinear',
+            4:              'uniform_rectilinear',
+            5:              'uniform_rectilinear',
         }
 
 
@@ -460,6 +460,33 @@ class BmiGiplMethod(object):
     def get_var_itemsize(self, var_name):
         return np.asarray(self.get_value_ref(var_name)).flatten()[0].nbytes
 
+    def get_var_grid(self, var_name):
+        grid_name = self._var_grid_map[var_name]
+        return self._grid_numbers[grid_name]
+
+    def get_grid_type(self, grid_id):
+        return self._grid_types[grid_id]
+
+    def get_grid_shape(self, grid_id):
+        """ find a variable with this grid id, and return its shape """
+        for var in self._var_grid_map.keys():
+            if self._grid_numbers[self._var_grid_map[var]] == grid_id:
+                return self.get_value_ref(var).shape
+
+    def get_grid_rank(self, grid_id):
+        """ find a variable with this grid id, and return its shape """
+        for var in self._var_grid_map.keys():
+            if self._grid_numbers[self._var_grid_map[var]] == grid_id:
+                return self.get_value_ref(var).ndim
+
+    def get_grid_size(self, grid_id):
+        grid_size = self.get_grid_shape(grid_id)
+        if grid_size == ():
+            return 1
+        else:
+            return int(np.prod(grid_size))
+
+
 
 if __name__ == '__main__':
     # Note: this currently just runs the code, rather than running via BMI
@@ -490,4 +517,25 @@ if __name__ == '__main__':
         bmigipl._model.write_output()
 
         python_time_loop += python_n_time
+
+    print(' ')
+
+    time_step_grid = bmigipl.get_var_grid('model_current__timestep')
+    print('time_step_grid_id: {}'.format(time_step_grid))
+    print('  grid type: {}'.format(bmigipl.get_grid_type(time_step_grid)))
+    print('  grid shape: {}'.format(bmigipl.get_grid_shape(time_step_grid)))
+    print('  grid rank: {}'.format(bmigipl.get_grid_rank(time_step_grid)))
+    print('  grid size: {}'.format(bmigipl.get_grid_size(time_step_grid)))
+
+    print(' ')
+
+    temperature_grid = bmigipl.get_var_grid('soil__temperature')
+    print('temperature_grid_id: {}'.format(temperature_grid))
+    print('  grid type: {}'.format(bmigipl.get_grid_type(temperature_grid)))
+    print('  grid shape: {}'.format(bmigipl.get_grid_shape(temperature_grid)))
+    print('  grid rank: {}'.format(bmigipl.get_grid_rank(temperature_grid)))
+    print('  grid size: {}'.format(bmigipl.get_grid_size(temperature_grid)))
+
+    print(' ')
+
     bmigipl.finalize()
