@@ -19,6 +19,7 @@ program gipl2
 
   real*8 :: time_reference_counter
   character(64) :: passed_config_filename
+  character(64) :: string_argument
 
   if (iargc() .eq. 1) then
     call getarg(1, fconfig)
@@ -52,7 +53,8 @@ program gipl2
   ! the annual cycle
   do while (time_loop .lt. time_e)
     print*, 'run_gipl time_loop: ', time_loop
-    time_reference_counter = time_loop
+    string_argument = 'model_current__timestep'
+    call get_value(string_argument, time_reference_counter)
 
     ! Note: if an adjustment to surface temperature, snow depth, or stcon
     !    is to be made, it should be made before a call to update()

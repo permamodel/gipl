@@ -313,7 +313,13 @@ class BmiGiplMethod(object):
 
 
     def get_value(self, var_name):
-        return self.get_value_ref(var_name).copy()
+        #return self.get_value_ref(var_name).copy()
+
+        #thevalue = None
+        #self._model.get_value(var_name, thevalue)
+        #return thevalue
+
+        return self._model.get_value(var_name)
 
 
     def set_value(self, var_name, src):

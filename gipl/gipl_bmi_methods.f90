@@ -58,3 +58,48 @@ subroutine get_end_time(end_time_value)
   end_time_value = time_e
 
 end subroutine get_end_time
+
+
+subroutine get_var_ref(var_name, dest)
+  use gipl_bmi
+
+  implicit none
+
+  character(64) :: var_name
+
+  !real*8, target :: time_loop_val
+  real*8, pointer, intent(inout) :: dest
+
+  select case (var_name)
+  case ('model_current__timestep')
+    dest = time_loop
+  end select
+end subroutine get_var_ref
+
+
+subroutine get_value(var_name, dest)
+  use gipl_bmi
+
+  implicit none
+
+  character(64) :: var_name
+  real*8 :: temporary_float
+  integer :: temporary_int
+  real*8, intent(out) :: dest
+
+  select case (var_name)
+  case ('model_current__timestep')
+    temporary_float = time_loop
+    dest = temporary_float
+  case ('model_timesteps_per_year')
+    temporary_int = n_time
+    print*, 'temporary_int: ', temporary_int
+    dest = temporary_int
+  case default
+    print*, 'Default case, fail:', var_name
+    print*, 'model_current__timestep', 'xxx'
+    print*, var_name, 'xxx'
+    stop
+  end select
+
+end subroutine get_value
