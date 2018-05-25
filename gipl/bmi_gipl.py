@@ -279,7 +279,8 @@ class BmiGiplMethod(object):
 
 
     def update(self):
-        self._model.update_model()
+        #self._model.update_model()
+        self._model.update()
         # Currently, need to call write_output() as part of update
         # so that output values are identical
         self._model.write_output()

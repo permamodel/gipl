@@ -12,4 +12,6 @@ subroutine initialize(initial_config_file)
 end subroutine initialize
 
 
-
+subroutine update()
+  call update_model()
+end subroutine update

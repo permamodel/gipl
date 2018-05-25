@@ -55,19 +55,19 @@ program gipl2
     time_reference_counter = time_loop
 
     ! Note: if an adjustment to surface temperature, snow depth, or stcon
-    !    is to be made, it should be made before a call to update_model()
+    !    is to be made, it should be made before a call to update()
     !    and to the internal-interpolated grids:
     !       utemp_i(i_time(i_site)))
     !       snd_i(i_time(i_site)))
     !       stcon_i(i_time(i_site)))
     !    These values were interpolated for the following year at the end
-    !      of the previous year in update_model() (or initialize() for 1st yr
-    call update_model()
+    !      of the previous year in update() (or initialize() for 1st yr
+    call update()
     call update_model_until(time_reference_counter + (n_time - 3) * time_step)
-    call update_model()
-    call update_model()
+    call update()
+    call update()
     call write_output()
-    call update_model()
+    call update()
     call write_output()
   enddo
 
