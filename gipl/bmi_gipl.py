@@ -279,7 +279,6 @@ class BmiGiplMethod(object):
 
 
     def update(self):
-        #self._model.update_model()
         self._model.update()
         # Currently, need to call write_output() as part of update
         # so that output values are identical
@@ -287,7 +286,7 @@ class BmiGiplMethod(object):
 
 
     def update_until(self, target_time):
-        self._model.update_model_until(target_time)
+        self._model.update_until(target_time)
 
 
     def finalize(self):

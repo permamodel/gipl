@@ -63,7 +63,7 @@ program gipl2
     !    These values were interpolated for the following year at the end
     !      of the previous year in update() (or initialize() for 1st yr
     call update()
-    call update_model_until(time_reference_counter + (n_time - 3) * time_step)
+    call update_until(time_reference_counter + (n_time - 3) * time_step)
     call update()
     call update()
     call write_output()
