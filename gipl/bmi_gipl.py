@@ -248,10 +248,8 @@ class BmiGiplMethod(object):
 
     def initialize(self, cfg_filename=None):
         if cfg_filename:
-            #self._model.initialize_f90(cfg_filename)
             self._model.initialize(cfg_filename)
         else:
-            #self._model.initialize_f90(self.default_config_filename)
             self._model.initialize(self.default_config_filename)
 
 
@@ -288,7 +286,7 @@ class BmiGiplMethod(object):
 
 
     def finalize(self):
-        self._model.finalize_f90()
+        self._model.finalize()
 
 
     def get_start_time(self):

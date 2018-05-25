@@ -28,3 +28,9 @@ subroutine update_until(target_time)
   call update_model_until(target_time)
 
 end subroutine update_until
+
+
+subroutine finalize()
+  call finalize_f90()
+
+end subroutine finalize

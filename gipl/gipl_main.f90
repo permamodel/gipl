@@ -71,6 +71,6 @@ program gipl2
     !call write_output()
   enddo
 
-  call finalize_f90()
+  call finalize()
 
 end program gipl2
