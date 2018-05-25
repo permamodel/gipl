@@ -34,3 +34,27 @@ subroutine finalize()
   call finalize_f90()
 
 end subroutine finalize
+
+
+subroutine get_time_step(time_step_value)
+  use gipl_bmi
+
+  implicit none
+
+  real*8, intent(out) :: time_step_value
+
+  time_step_value = time_step
+
+end subroutine get_time_step
+
+
+subroutine get_end_time(end_time_value)
+  use gipl_bmi
+
+  implicit none
+
+  real*8, intent(out) :: end_time_value
+
+  end_time_value = time_e
+
+end subroutine get_end_time

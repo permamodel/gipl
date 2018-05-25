@@ -294,11 +294,13 @@ class BmiGiplMethod(object):
 
 
     def get_end_time(self):
-        return self.get_value('model_last__timestep')
+        #return self.get_value('model_last__timestep')
+        return self._model.get_end_time()
 
 
     def get_time_step(self):
-        return self.get_value('model__timestep')
+        #return self.get_value('model__timestep')
+        return self._model.get_time_step()
 
 
     def get_current_time(self):
