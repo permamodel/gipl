@@ -53,7 +53,7 @@ subroutine run_gipl(filename_from_python)
 
   passed_config_filename = fconfig
 
-  call initialize(passed_config_filename)
+  call initialize_f90(passed_config_filename)
 
   ! Because we want to test both update() and update_until(), and because
   ! there are write()s both the time of a year's timestep and the timestep
@@ -80,7 +80,7 @@ subroutine run_gipl(filename_from_python)
     call write_output()
   enddo
 
-  call finalize()
+  call finalize_f90()
 
 end subroutine run_gipl
 
@@ -268,16 +268,16 @@ subroutine save_restart()
 end subroutine save_restart
 
 
-subroutine finalize()
+subroutine finalize_f90()
 
   implicit none
 
   close(1);close(2);close(3)
 
-end subroutine finalize
+end subroutine finalize_f90
 
 
-subroutine initialize(named_config_file)
+subroutine initialize_f90(named_config_file)
   use gipl_bmi
   use gipl_const
   use bnd
@@ -630,7 +630,7 @@ subroutine initialize(named_config_file)
   allocate(snow_depth(n_total_timesteps))
   allocate(snow_thermal_conductivity(n_total_timesteps))
 
-end subroutine initialize
+end subroutine initialize_f90
 
 
 subroutine init_cond(q,last)
