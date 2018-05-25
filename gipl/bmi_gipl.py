@@ -277,11 +277,12 @@ class BmiGiplMethod(object):
 
 
     def update(self):
-        self._model.update_model()
+        #Note: gipl's update function calls the write_output() routine too
+        self._model.update()
 
 
     def update_until(self, target_time):
-        self._model.update_model_until(target_time)
+        self._model.update_until(target_time)
 
 
     def finalize(self):
@@ -293,11 +294,13 @@ class BmiGiplMethod(object):
 
 
     def get_end_time(self):
-        return self.get_value('model_last__timestep')
+        #return self.get_value('model_last__timestep')
+        return self._model.get_end_time()
 
 
     def get_time_step(self):
-        return self.get_value('model__timestep')
+        #return self.get_value('model__timestep')
+        return self._model.get_time_step()
 
 
     def get_current_time(self):
@@ -310,7 +313,13 @@ class BmiGiplMethod(object):
 
 
     def get_value(self, var_name):
-        return self.get_value_ref(var_name).copy()
+        #return self.get_value_ref(var_name).copy()
+
+        #thevalue = None
+        #self._model.get_value(var_name, thevalue)
+        #return thevalue
+
+        return self._model.get_value(var_name)
 
 
     def set_value(self, var_name, src):
@@ -397,9 +406,7 @@ if __name__ == '__main__':
         time_loop_in_loop = bmigipl.get_value('model_current__timestep')
         bmigipl.update()
         bmigipl.update()
-        bmigipl._model.write_output()
         bmigipl.update()
-        bmigipl._model.write_output()
 
         python_time_loop += python_n_time
 

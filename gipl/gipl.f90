@@ -1,90 +1,3 @@
-! Geophysical Institute Permafrost Laboratory model version 2 GIPLv2
-! version 2 is a numerical transient model that employs phase changes
-! and the effect of the unfrozen volumetric water content in the
-! non-homogeneuos soil texture
-! Original version of the model developed by Romanovsky and Tipenko 2004
-! and described in Marchenko et al., (2008)
-! Current version been significantly modified from its predecessor
-! and uses IRF coding design
-! This version is maintained by E. Jafarov at INSTAAR, CU Boulder
-! Please cite Jafarov et al., (2012) work when using it.
-
-program gipl2
-  use gipl_bmi
-
-  implicit none
-
-  character(64) :: empty_filename = ''
-
-  if (iargc() .eq. 1) then
-    call getarg(1, fconfig)
-  else
-    !fconfig = 'gipl_config_3yr.cfg'
-    fconfig = '../examples/gipl_config_3yr.cfg'
-  endif
-
-  print*,'Running from Fortran with config file: ', fconfig
-
-  call run_gipl(empty_filename)
-end
-
-
-subroutine run_gipl(filename_from_python)
-  use gipl_bmi
-
-  implicit none
-  real*8 :: time_reference_counter
-
-  character(64) :: filename_from_python
-  character(64) :: passed_config_filename
-
-  if (filename_from_python .ne. '') then
-    fconfig = filename_from_python
-  endif
-  
-  ! if configuration file is defined elsewhere, use that
-  ! otherwise, set a default here
-  if (fconfig .eq. '') then
-    fconfig='gipl_config_3yr.cfg'
-    print *, 'No config file specified.  Using: ', fconfig
-  ! Full 135 year config file:
-  !   fconfig='gipl_config.cfg'
-  endif
-
-  passed_config_filename = fconfig
-
-  call initialize(passed_config_filename)
-
-  ! Because we want to test both update() and update_until(), and because
-  ! there are write()s both the time of a year's timestep and the timestep
-  ! prior, we need two calls to write_output() at different points in
-  ! the annual cycle
-  do while (time_loop .lt. time_e)
-    print*, 'run_gipl time_loop: ', time_loop
-    time_reference_counter = time_loop
-
-    ! Note: if an adjustment to surface temperature, snow depth, or stcon
-    !    is to be made, it should be made before a call to update_model()
-    !    and to the internal-interpolated grids:
-    !       utemp_i(i_time(i_site)))
-    !       snd_i(i_time(i_site)))
-    !       stcon_i(i_time(i_site)))
-    !    These values were interpolated for the following year at the end
-    !      of the previous year in update_model() (or initialize() for 1st yr
-    call update_model()
-    call update_model_until(time_reference_counter + (n_time - 3) * time_step)
-    call update_model()
-    call update_model()
-    call write_output()
-    call update_model()
-    call write_output()
-  enddo
-
-  call finalize()
-
-end subroutine run_gipl
-
-
 subroutine update_model_until(until_time)
   use gipl_bmi
 
@@ -268,16 +181,16 @@ subroutine save_restart()
 end subroutine save_restart
 
 
-subroutine finalize()
+subroutine finalize_f90()
 
   implicit none
 
   close(1);close(2);close(3)
 
-end subroutine finalize
+end subroutine finalize_f90
 
 
-subroutine initialize(named_config_file)
+subroutine initialize_f90(named_config_file)
   use gipl_bmi
   use gipl_const
   use bnd
@@ -630,7 +543,7 @@ subroutine initialize(named_config_file)
   allocate(snow_depth(n_total_timesteps))
   allocate(snow_thermal_conductivity(n_total_timesteps))
 
-end subroutine initialize
+end subroutine initialize_f90
 
 
 subroutine init_cond(q,last)
