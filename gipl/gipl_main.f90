@@ -66,9 +66,9 @@ program gipl2
     call update_until(time_reference_counter + (n_time - 3) * time_step)
     call update()
     call update()
-    call write_output()
+    !call write_output()
     call update()
-    call write_output()
+    !call write_output()
   enddo
 
   call finalize_f90()

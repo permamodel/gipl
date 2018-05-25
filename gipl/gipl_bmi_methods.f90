@@ -15,6 +15,7 @@ end subroutine initialize
 
 subroutine update()
   call update_model()
+  call write_output()
 
 end subroutine update
 

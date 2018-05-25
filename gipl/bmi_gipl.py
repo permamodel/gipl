@@ -279,10 +279,8 @@ class BmiGiplMethod(object):
 
 
     def update(self):
+        #Note: gipl's update function calls the write_output() routine too
         self._model.update()
-        # Currently, need to call write_output() as part of update
-        # so that output values are identical
-        self._model.write_output()
 
 
     def update_until(self, target_time):
@@ -402,9 +400,7 @@ if __name__ == '__main__':
         time_loop_in_loop = bmigipl.get_value('model_current__timestep')
         bmigipl.update()
         bmigipl.update()
-        #bmigipl._model.write_output()
         bmigipl.update()
-        #bmigipl._model.write_output()
 
         python_time_loop += python_n_time
 
